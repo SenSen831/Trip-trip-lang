@@ -1,0 +1,1305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IT Student Wiki — Dev Knowledge Base</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Space+Grotesk:wght@300;400;600;700&family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#0d0f14; --surface:#13161e; --surface2:#1a1e2a; --border:#252836;
+    --java:#f89820; --js:#f7df1e; --html:#e34c26; --css:#264de4;
+    --text:#e8e9f0; --muted:#7a7f94; --accent:#5ee7df;
+    --radius:8px; --navbar-h:48px; --gold:#f5c842;
+    --accent-nav:#00d4ff; --panel2:#111a2a; --border2:#253250;
+    --sidebar-w:230px; --green:#00e676;
+  }
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;}
+
+  /* NAVBAR */
+  .top-navbar{position:sticky;top:0;height:var(--navbar-h);background:rgba(8,12,20,.96);
+    backdrop-filter:blur(12px);border-bottom:1px solid #1c2840;
+    display:flex;align-items:center;padding:0 20px;gap:20px;z-index:200;}
+  .nav-left .logo-text{font-family:'Space Mono',monospace;font-size:.9rem;font-weight:700;
+    color:var(--accent-nav);text-shadow:0 0 14px rgba(0,212,255,.4);letter-spacing:.08em;
+    white-space:nowrap;text-decoration:none;}
+  .nav-menu{display:flex;list-style:none;gap:2px;margin-left:10px;}
+  .nav-menu li a{display:block;padding:5px 12px;font-size:.78rem;font-weight:600;color:#6b859e;
+    text-decoration:none;border-radius:6px;border:1px solid transparent;transition:all .15s;
+    white-space:nowrap;font-family:'DM Sans',sans-serif;}
+  .nav-menu li a:hover{color:#d8e6f5;background:rgba(255,255,255,.04);border-color:#1c2840;}
+  .nav-menu li a.active{color:var(--gold);background:rgba(245,200,66,.07);border-color:rgba(245,200,66,.2);}
+  .nav-right{margin-left:auto;}
+  .nav-right .nav-profile{display:flex;align-items:center;gap:7px;padding:5px 13px;font-size:.78rem;
+    font-weight:600;color:#d8e6f5;text-decoration:none;background:var(--panel2);
+    border:1px solid var(--border2);border-radius:7px;transition:all .15s;white-space:nowrap;}
+  .nav-right .nav-profile:hover{background:#162033;border-color:rgba(0,212,255,.3);color:var(--accent-nav);}
+
+  /* SEARCH BAR */
+  .search-bar-wrap{padding:0 10px;flex:1;max-width:320px;}
+  .search-bar{display:flex;align-items:center;gap:8px;background:var(--surface2);
+    border:1px solid var(--border);border-radius:8px;padding:5px 12px;transition:border-color .2s;}
+  .search-bar:focus-within{border-color:rgba(0,212,255,.4);}
+  .search-bar input{background:none;border:none;color:var(--text);font-size:.82rem;
+    font-family:'DM Sans',sans-serif;outline:none;width:100%;}
+  .search-bar input::placeholder{color:var(--muted);}
+  .search-bar .s-icon{color:var(--muted);font-size:14px;flex-shrink:0;}
+
+  /* SEARCH RESULTS DROPDOWN */
+  .search-results{position:absolute;top:calc(var(--navbar-h) + 4px);left:0;right:0;
+    max-width:400px;margin:0 auto;background:var(--surface);border:1px solid var(--border2);
+    border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,.5);z-index:300;display:none;overflow:hidden;}
+  .search-results.show{display:block;}
+  .sr-item{display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;
+    border-bottom:1px solid var(--border);transition:background .15s;font-size:.84rem;}
+  .sr-item:last-child{border-bottom:none;}
+  .sr-item:hover{background:var(--surface2);}
+  .sr-lang{font-size:.6rem;font-weight:700;padding:1px 5px;border-radius:3px;
+    font-family:'IBM Plex Mono',monospace;flex-shrink:0;}
+  .sr-title{color:var(--text);font-weight:500;}
+  .sr-preview{font-size:.72rem;color:var(--muted);margin-top:2px;}
+  .sr-empty{padding:14px;text-align:center;color:var(--muted);font-size:.82rem;}
+
+  /* LAYOUT */
+  .layout{display:grid;grid-template-columns:var(--sidebar-w) 1fr;
+    min-height:calc(100vh - var(--navbar-h));align-items:start;}
+
+  /* SIDEBAR */
+  aside{background:var(--surface);border-right:1px solid var(--border);
+    padding:1rem 0;position:sticky;top:var(--navbar-h);
+    height:calc(100vh - var(--navbar-h));overflow-y:auto;
+    scrollbar-width:thin;scrollbar-color:var(--border) transparent;}
+  aside::-webkit-scrollbar{width:4px;}
+  aside::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+
+  /* Progress summary in sidebar */
+  .sidebar-progress{margin:0 10px 12px;background:var(--surface2);border:1px solid var(--border);
+    border-radius:8px;padding:10px 12px;}
+  .sp-label{font-size:.6rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--muted);margin-bottom:6px;font-family:'IBM Plex Mono',monospace;}
+  .sp-bar{height:4px;background:var(--border);border-radius:99px;overflow:hidden;margin-bottom:5px;}
+  .sp-fill{height:100%;background:linear-gradient(90deg,var(--accent-nav),var(--accent));
+    border-radius:99px;transition:width .5s ease;}
+  .sp-text{font-size:.65rem;color:var(--text2,#6b859e);font-family:'IBM Plex Mono',monospace;}
+
+  .sidebar-section{margin-bottom:.3rem;}
+  .sidebar-label{font-family:'IBM Plex Mono',monospace;font-size:.63rem;font-weight:600;
+    text-transform:uppercase;letter-spacing:.1em;color:var(--muted);padding:.6rem 1.2rem .3rem;}
+  .sidebar-item{display:flex;align-items:center;gap:.6rem;padding:.42rem 1rem;font-size:.81rem;
+    color:#9aa0b8;cursor:pointer;transition:all .15s;border-left:2px solid transparent;
+    font-family:'DM Sans',sans-serif;position:relative;}
+  .sidebar-item:hover{background:var(--surface2);color:var(--text);border-left-color:var(--border);}
+  .sidebar-item.active{background:var(--surface2);color:var(--text);font-weight:600;}
+  .sidebar-item[data-lang="java"].active{border-left-color:var(--java);color:var(--java);}
+  .sidebar-item[data-lang="js"].active{border-left-color:var(--js);color:var(--js);}
+  .sidebar-item[data-lang="html"].active{border-left-color:var(--html);color:var(--html);}
+  .sidebar-item[data-lang="css"].active{border-left-color:#7b9cf5;color:#7b9cf5;}
+  .dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+  .dot-java{background:var(--java);}
+  .dot-js{background:var(--js);}
+  .dot-html{background:var(--html);}
+  .dot-css{background:var(--css);}
+
+  /* Read checkmark on sidebar */
+  .read-check{margin-left:auto;font-size:11px;color:var(--green);opacity:0;transition:opacity .2s;}
+  .read-check.show{opacity:1;}
+
+  /* MAIN */
+  main{padding:2.5rem 3rem;max-width:920px;}
+
+  /* HOME */
+  .home{display:block;}
+  .home-hero{margin-bottom:2.5rem;padding-bottom:2rem;border-bottom:1px solid var(--border);}
+  .home-hero h1{font-family:'Libre Baskerville',serif;font-size:2.6rem;line-height:1.2;margin-bottom:1rem;}
+  .home-hero p{color:var(--muted);font-size:1rem;line-height:1.7;max-width:600px;}
+
+  /* Overall progress on home */
+  .home-progress{background:var(--surface);border:1px solid var(--border);border-radius:10px;
+    padding:16px 20px;margin-bottom:2rem;display:flex;align-items:center;gap:20px;}
+  .hp-label{font-size:.7rem;font-weight:700;color:var(--muted);letter-spacing:.08em;
+    text-transform:uppercase;font-family:'IBM Plex Mono',monospace;white-space:nowrap;}
+  .hp-bar{flex:1;height:8px;background:var(--border);border-radius:99px;overflow:hidden;}
+  .hp-fill{height:100%;background:linear-gradient(90deg,var(--accent-nav),var(--accent));
+    border-radius:99px;transition:width .6s ease;box-shadow:0 0 8px rgba(0,212,255,.3);}
+  .hp-count{font-size:.78rem;font-weight:700;color:var(--accent-nav);
+    font-family:'IBM Plex Mono',monospace;white-space:nowrap;}
+
+  .lang-cards{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem;margin-bottom:2rem;}
+  .lang-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+    padding:1.5rem;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;}
+  .lang-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
+  .lang-card[data-lang="java"]::before{background:var(--java);}
+  .lang-card[data-lang="js"]::before{background:var(--js);}
+  .lang-card[data-lang="html"]::before{background:var(--html);}
+  .lang-card[data-lang="css"]::before{background:var(--css);}
+  .lang-card:hover{border-color:#3a3f52;transform:translateY(-2px);box-shadow:0 8px 30px rgba(0,0,0,.3);}
+  .card-icon{font-size:2rem;margin-bottom:.7rem;}
+  .card-title{font-weight:700;font-size:1.1rem;margin-bottom:.4rem;}
+  .lang-card[data-lang="java"] .card-title{color:var(--java);}
+  .lang-card[data-lang="js"]   .card-title{color:var(--js);}
+  .lang-card[data-lang="html"] .card-title{color:var(--html);}
+  .lang-card[data-lang="css"]  .card-title{color:#7b9cf5;}
+  .card-desc{color:var(--muted);font-size:.84rem;line-height:1.5;}
+  .card-topics{margin-top:.8rem;display:flex;flex-wrap:wrap;gap:.4rem;}
+  .topic-tag{font-family:'IBM Plex Mono',monospace;font-size:.68rem;background:var(--surface2);
+    border:1px solid var(--border);border-radius:3px;padding:.15rem .5rem;color:var(--muted);}
+  .card-read-count{margin-top:.8rem;font-size:.65rem;color:var(--muted);
+    font-family:'IBM Plex Mono',monospace;}
+
+  /* ARTICLE */
+  .article{display:none;}
+  .article-header{border-bottom:1px solid var(--border);padding-bottom:1.5rem;margin-bottom:2rem;}
+  .article-breadcrumb{font-family:'IBM Plex Mono',monospace;font-size:.74rem;color:var(--muted);margin-bottom:.8rem;}
+  .article-breadcrumb span{cursor:pointer;transition:color .15s;}
+  .article-breadcrumb span:hover{color:var(--accent);}
+
+  /* Mark as Read button */
+  .article-actions{display:flex;align-items:center;gap:10px;margin-top:10px;}
+  .mark-read-btn{display:flex;align-items:center;gap:6px;padding:6px 14px;
+    background:var(--surface2);border:1px solid var(--border);border-radius:6px;
+    color:var(--muted);font-size:.72rem;font-weight:600;cursor:pointer;transition:all .15s;
+    font-family:'DM Sans',sans-serif;}
+  .mark-read-btn:hover{border-color:rgba(0,230,118,.4);color:var(--green);}
+  .mark-read-btn.read{background:rgba(0,230,118,.07);border-color:rgba(0,230,118,.3);color:var(--green);}
+  .read-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;
+    background:rgba(0,230,118,.08);border:1px solid rgba(0,230,118,.2);border-radius:99px;
+    color:var(--green);font-size:.68rem;font-weight:700;font-family:'IBM Plex Mono',monospace;}
+
+  .article-title{font-family:'Libre Baskerville',serif;font-size:2.1rem;line-height:1.2;margin-bottom:.8rem;}
+  .article-meta{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;}
+  .lang-badge{font-family:'IBM Plex Mono',monospace;font-size:.72rem;font-weight:600;
+    padding:.2rem .6rem;border-radius:3px;letter-spacing:.05em;}
+  .lang-badge.java{background:rgba(248,152,32,.15);color:var(--java);border:1px solid rgba(248,152,32,.4);}
+  .lang-badge.js{background:rgba(247,223,30,.1);color:var(--js);border:1px solid rgba(247,223,30,.4);}
+  .lang-badge.html{background:rgba(227,76,38,.12);color:var(--html);border:1px solid rgba(227,76,38,.4);}
+  .lang-badge.css{background:rgba(38,77,228,.12);color:#7b9cf5;border:1px solid rgba(38,77,228,.5);}
+  .article-difficulty{font-size:.78rem;color:var(--muted);}
+  .article-body h2{font-family:'Libre Baskerville',serif;font-size:1.45rem;margin-top:2.4rem;
+    margin-bottom:1rem;padding-bottom:.5rem;border-bottom:1px solid var(--border);}
+  .article-body h3{font-size:1.05rem;font-weight:600;margin-top:1.6rem;margin-bottom:.6rem;color:var(--accent);}
+  .article-body p{color:#c5c8d6;line-height:1.8;margin-bottom:1rem;font-size:.94rem;}
+  .article-body ul,.article-body ol{padding-left:1.5rem;margin-bottom:1rem;}
+  .article-body li{color:#c5c8d6;line-height:1.8;font-size:.94rem;margin-bottom:.3rem;}
+  .infobox{float:right;background:var(--surface);border:1px solid var(--border);
+    border-radius:var(--radius);padding:1rem;margin:0 0 1.5rem 2rem;width:230px;font-size:.81rem;}
+  .infobox-title{font-family:'IBM Plex Mono',monospace;font-size:.73rem;font-weight:600;
+    text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:.8rem;
+    padding-bottom:.5rem;border-bottom:1px solid var(--border);}
+  .infobox-row{display:flex;justify-content:space-between;margin-bottom:.4rem;}
+  .infobox-key{color:var(--muted);}
+  .infobox-val{color:var(--text);font-weight:600;}
+  pre{background:#090b10;border:1px solid var(--border);border-radius:var(--radius);
+    overflow-x:auto;margin:1rem 0 1.5rem;font-family:'IBM Plex Mono',monospace;
+    font-size:.81rem;line-height:1.7;position:relative;}
+  .pre-header{display:flex;align-items:center;justify-content:space-between;
+    padding:8px 14px;border-bottom:1px solid var(--border);background:rgba(255,255,255,.02);}
+  .pre-lang-tag{font-size:.62rem;color:var(--muted);font-family:'IBM Plex Mono',monospace;
+    letter-spacing:.06em;text-transform:uppercase;}
+  .try-btn{font-size:.65rem;font-weight:700;padding:3px 10px;border-radius:4px;
+    background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.2);color:var(--accent-nav);
+    cursor:pointer;transition:all .15s;font-family:'DM Sans',sans-serif;}
+  .try-btn:hover{background:rgba(0,212,255,.15);border-color:rgba(0,212,255,.4);}
+  pre code{display:block;padding:1rem 1.4rem;background:none;border:none;color:inherit;font-size:inherit;}
+  code{font-family:'IBM Plex Mono',monospace;font-size:.85em;background:#090b10;
+    border:1px solid var(--border);border-radius:3px;padding:.1em .4em;color:var(--accent);}
+  .keyword{color:#c792ea;} .string{color:#c3e88d;} .comment{color:#546e7a;font-style:italic;}
+  .number{color:#f78c6c;} .fn{color:#82aaff;} .type{color:#ffcb6b;}
+  .tag{color:var(--html);} .attr{color:var(--js);} .val{color:#c3e88d;}
+  .prop{color:#7b9cf5;}
+  .tip-box{background:rgba(94,231,223,.05);border:1px solid rgba(94,231,223,.2);
+    border-left:3px solid var(--accent);border-radius:0 var(--radius) var(--radius) 0;
+    padding:1rem 1.2rem;margin:1.5rem 0;}
+  .tip-box strong{color:var(--accent);font-size:.78rem;text-transform:uppercase;letter-spacing:.05em;}
+  .tip-box p{margin:.4rem 0 0;font-size:.9rem;}
+  .toc{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+    padding:1rem 1.2rem;margin-bottom:2rem;display:inline-block;min-width:220px;}
+  .toc-title{font-weight:600;font-size:.84rem;margin-bottom:.6rem;}
+  .toc a{display:block;font-size:.81rem;color:var(--muted);text-decoration:none;padding:.2rem 0;transition:color .15s;}
+  .toc a:hover{color:var(--accent);}
+  .toc a::before{content:'§ ';color:var(--border);}
+  .clearfix::after{content:'';display:table;clear:both;}
+
+  /* ── INTERACTIVE CODE RUNNER ── */
+  .runner-wrap{border:1px solid var(--border);border-radius:var(--radius);
+    overflow:hidden;margin:1rem 0 1.5rem;background:#090b10;}
+  .runner-tabs{display:flex;border-bottom:1px solid var(--border);background:rgba(255,255,255,.02);}
+  .runner-tab{padding:7px 14px;font-size:.72rem;font-weight:600;color:var(--muted);
+    cursor:pointer;border-right:1px solid var(--border);transition:all .15s;
+    font-family:'IBM Plex Mono',monospace;}
+  .runner-tab.active{color:var(--accent-nav);background:rgba(0,212,255,.06);}
+  .runner-editor{width:100%;min-height:120px;max-height:260px;background:transparent;
+    border:none;color:#c5c8d6;font-family:'IBM Plex Mono',monospace;font-size:.81rem;
+    line-height:1.7;padding:12px 14px;outline:none;resize:vertical;}
+  .runner-actions{display:flex;align-items:center;gap:8px;padding:8px 12px;
+    border-top:1px solid var(--border);background:rgba(255,255,255,.02);}
+  .run-btn{display:flex;align-items:center;gap:6px;padding:6px 16px;border:none;border-radius:6px;
+    background:linear-gradient(135deg,var(--accent-nav),var(--accent));color:#080c14;
+    font-size:.75rem;font-weight:700;cursor:pointer;transition:all .15s;
+    font-family:'DM Sans',sans-serif;}
+  .run-btn:hover{transform:scale(1.03);box-shadow:0 0 14px rgba(0,212,255,.3);}
+  .reset-btn{padding:6px 12px;border:1px solid var(--border);border-radius:6px;
+    background:transparent;color:var(--muted);font-size:.72rem;cursor:pointer;transition:all .15s;
+    font-family:'DM Sans',sans-serif;}
+  .reset-btn:hover{border-color:var(--border2);color:var(--text);}
+  .runner-note{font-size:.63rem;color:var(--muted);margin-left:auto;font-family:'IBM Plex Mono',monospace;}
+  .runner-output{border-top:1px solid var(--border);background:#06080d;min-height:60px;
+    max-height:180px;overflow-y:auto;padding:10px 14px;font-family:'IBM Plex Mono',monospace;
+    font-size:.78rem;line-height:1.7;display:none;}
+  .runner-output.show{display:block;}
+  .out-line{margin-bottom:2px;}
+  .out-line.error{color:#ff6b6b;}
+  .out-line.success{color:var(--green);}
+  .out-line.info{color:var(--accent-nav);}
+  .out-line.normal{color:#c5c8d6;}
+
+  /* MODAL for runner */
+  .runner-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);
+    backdrop-filter:blur(6px);z-index:500;align-items:center;justify-content:center;padding:20px;}
+  .runner-modal.open{display:flex;}
+  .runner-modal-inner{background:var(--surface);border:1px solid var(--border2);
+    border-radius:14px;width:100%;max-width:680px;overflow:hidden;
+    display:flex;flex-direction:column;max-height:90vh;}
+  .rm-header{display:flex;align-items:center;justify-content:space-between;
+    padding:14px 18px;border-bottom:1px solid var(--border);}
+  .rm-title{font-weight:700;font-size:.92rem;color:var(--text);}
+  .rm-close{background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer;}
+  .rm-close:hover{color:var(--text);}
+  .rm-body{display:flex;flex-direction:column;flex:1;overflow:hidden;}
+  .rm-editor{width:100%;flex:1;min-height:200px;background:#090b10;border:none;
+    color:#c5c8d6;font-family:'IBM Plex Mono',monospace;font-size:.82rem;
+    line-height:1.7;padding:14px 18px;outline:none;resize:none;}
+  .rm-actions{display:flex;gap:8px;padding:10px 14px;border-top:1px solid var(--border);
+    background:rgba(255,255,255,.02);align-items:center;}
+  .rm-output{background:#06080d;border-top:1px solid var(--border);min-height:80px;
+    max-height:200px;overflow-y:auto;padding:10px 14px;font-family:'IBM Plex Mono',monospace;
+    font-size:.78rem;line-height:1.7;}
+
+  @media(max-width:768px){
+    .layout{grid-template-columns:1fr;}
+    aside{display:none;}
+    main{padding:1.5rem;}
+    .lang-cards{grid-template-columns:1fr;}
+    .infobox{float:none;width:100%;margin:0 0 1.5rem;}
+    .nav-menu{display:none;}
+    .search-bar-wrap{max-width:200px;}
+  }
+</style>
+</head>
+<body>
+
+<nav class="top-navbar">
+  <div class="nav-left"><a href="main.html" class="logo-text">CodeJourney</a></div>
+  <ul class="nav-menu">
+    <li><a href="community.html">Community</a></li>
+    <li><a href="wiki.html" class="active">Wiki</a></li>
+    <li><a href="challenges.html">Challenges</a></li>
+    <li><a href="levels.html">Levels</a></li>
+  </ul>
+
+  <!-- SEARCH BAR -->
+  <div class="search-bar-wrap" style="position:relative;">
+    <div class="search-bar">
+      <span class="s-icon">🔍</span>
+      <input type="text" id="search-input" placeholder="Search articles..." autocomplete="off"
+        oninput="handleSearch(this.value)" onfocus="handleSearch(this.value)" onblur="setTimeout(hideSearch,200)">
+    </div>
+    <div class="search-results" id="search-results"></div>
+  </div>
+
+  <div class="nav-right"><a href="profile.html" class="nav-profile">👤 Profile</a></div>
+</nav>
+
+<div class="layout">
+  <aside id="sidebar">
+    <!-- Progress summary -->
+    <div class="sidebar-progress">
+      <div class="sp-label">Your Progress</div>
+      <div class="sp-bar"><div class="sp-fill" id="sp-fill" style="width:0%"></div></div>
+      <div class="sp-text" id="sp-text">0 / 12 articles read</div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Java</div>
+      <div class="sidebar-item" data-lang="java" data-id="java-intro"    onclick="showArticle('java-intro')">   <div class="dot dot-java"></div>Introduction to Java    <span class="read-check" id="rc-java-intro">✓</span></div>
+      <div class="sidebar-item" data-lang="java" data-id="java-oop"      onclick="showArticle('java-oop')">     <div class="dot dot-java"></div>OOP Concepts            <span class="read-check" id="rc-java-oop">✓</span></div>
+      <div class="sidebar-item" data-lang="java" data-id="java-arrays"   onclick="showArticle('java-arrays')">  <div class="dot dot-java"></div>Arrays & Collections    <span class="read-check" id="rc-java-arrays">✓</span></div>
+      <div class="sidebar-item" data-lang="java" data-id="java-exceptions" onclick="showArticle('java-exceptions')"><div class="dot dot-java"></div>Exception Handling  <span class="read-check" id="rc-java-exceptions">✓</span></div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">JavaScript</div>
+      <div class="sidebar-item" data-lang="js" data-id="js-intro"  onclick="showArticle('js-intro')"> <div class="dot dot-js"></div>Introduction to JS   <span class="read-check" id="rc-js-intro">✓</span></div>
+      <div class="sidebar-item" data-lang="js" data-id="js-dom"    onclick="showArticle('js-dom')">   <div class="dot dot-js"></div>DOM Manipulation      <span class="read-check" id="rc-js-dom">✓</span></div>
+      <div class="sidebar-item" data-lang="js" data-id="js-async"  onclick="showArticle('js-async')"> <div class="dot dot-js"></div>Async & Promises      <span class="read-check" id="rc-js-async">✓</span></div>
+      <div class="sidebar-item" data-lang="js" data-id="js-es6"    onclick="showArticle('js-es6')">   <div class="dot dot-js"></div>ES6+ Features         <span class="read-check" id="rc-js-es6">✓</span></div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">HTML</div>
+      <div class="sidebar-item" data-lang="html" data-id="html-intro"    onclick="showArticle('html-intro')">   <div class="dot dot-html"></div>HTML Basics         <span class="read-check" id="rc-html-intro">✓</span></div>
+      <div class="sidebar-item" data-lang="html" data-id="html-forms"    onclick="showArticle('html-forms')">   <div class="dot dot-html"></div>Forms & Inputs      <span class="read-check" id="rc-html-forms">✓</span></div>
+      <div class="sidebar-item" data-lang="html" data-id="html-semantic" onclick="showArticle('html-semantic')"><div class="dot dot-html"></div>Semantic HTML       <span class="read-check" id="rc-html-semantic">✓</span></div>
+      <div class="sidebar-item" data-lang="html" data-id="html-media"    onclick="showArticle('html-media')">   <div class="dot dot-html"></div>Media & Embedding   <span class="read-check" id="rc-html-media">✓</span></div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">CSS</div>
+      <div class="sidebar-item" data-lang="css" data-id="css-intro"   onclick="showArticle('css-intro')">  <div class="dot dot-css"></div>CSS Fundamentals  <span class="read-check" id="rc-css-intro">✓</span></div>
+      <div class="sidebar-item" data-lang="css" data-id="css-flexbox" onclick="showArticle('css-flexbox')"><div class="dot dot-css"></div>Flexbox Layout    <span class="read-check" id="rc-css-flexbox">✓</span></div>
+      <div class="sidebar-item" data-lang="css" data-id="css-grid"    onclick="showArticle('css-grid')">   <div class="dot dot-css"></div>CSS Grid          <span class="read-check" id="rc-css-grid">✓</span></div>
+      <div class="sidebar-item" data-lang="css" data-id="css-animations" onclick="showArticle('css-animations')"><div class="dot dot-css"></div>Animations      <span class="read-check" id="rc-css-animations">✓</span></div>
+    </div>
+  </aside>
+
+  <main>
+    <!-- HOME -->
+    <div id="page-home" class="home">
+      <div class="home-hero">
+        <h1>The IT Student's<br>Knowledge Base</h1>
+        <p>A comprehensive reference wiki covering the four pillars of front-end and back-end development. Learn Java, JavaScript, HTML, and CSS — complete with interactive code examples.</p>
+      </div>
+      <div class="home-progress">
+        <span class="hp-label">Overall Progress</span>
+        <div class="hp-bar"><div class="hp-fill" id="hp-fill" style="width:0%"></div></div>
+        <span class="hp-count" id="hp-count">0 / 16 read</span>
+      </div>
+      <div class="lang-cards">
+        <div class="lang-card" data-lang="java" onclick="showLang('java')">
+          <div class="card-icon">☕</div>
+          <div class="card-title">Java</div>
+          <div class="card-desc">Object-oriented, platform-independent language used in enterprise apps, Android, and backend systems.</div>
+          <div class="card-topics"><span class="topic-tag">OOP</span><span class="topic-tag">Collections</span><span class="topic-tag">Exceptions</span><span class="topic-tag">Generics</span></div>
+          <div class="card-read-count" id="home-java-prog">0 / 4 read</div>
+        </div>
+        <div class="lang-card" data-lang="js" onclick="showLang('js')">
+          <div class="card-icon">⚡</div>
+          <div class="card-title">JavaScript</div>
+          <div class="card-desc">The language of the web — dynamic, event-driven, and essential for interactive front-end and Node.js.</div>
+          <div class="card-topics"><span class="topic-tag">DOM</span><span class="topic-tag">Async</span><span class="topic-tag">ES6+</span><span class="topic-tag">Closures</span></div>
+          <div class="card-read-count" id="home-js-prog">0 / 4 read</div>
+        </div>
+        <div class="lang-card" data-lang="html" onclick="showLang('html')">
+          <div class="card-icon">🌐</div>
+          <div class="card-title">HTML</div>
+          <div class="card-desc">The skeleton of every web page — structured markup that browsers interpret to render content.</div>
+          <div class="card-topics"><span class="topic-tag">Semantics</span><span class="topic-tag">Forms</span><span class="topic-tag">Media</span><span class="topic-tag">A11y</span></div>
+          <div class="card-read-count" id="home-html-prog">0 / 4 read</div>
+        </div>
+        <div class="lang-card" data-lang="css" onclick="showLang('css')">
+          <div class="card-icon">🎨</div>
+          <div class="card-title">CSS</div>
+          <div class="card-desc">Styling and layout engine for the web — colors, fonts, Flexbox, Grid, and smooth animations.</div>
+          <div class="card-topics"><span class="topic-tag">Flexbox</span><span class="topic-tag">Grid</span><span class="topic-tag">Variables</span><span class="topic-tag">Animations</span></div>
+          <div class="card-read-count" id="home-css-prog">0 / 4 read</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════ JAVA ARTICLES ════ -->
+    <div id="page-java-intro" class="article" data-lang="java">
+      <div class="article-header">
+        <div class="article-breadcrumb"><span onclick="showHome()">Home</span> / <span onclick="showLang('java')">Java</span> / Introduction</div>
+        <div class="article-title">Introduction to Java</div>
+        <div class="article-meta">
+          <span class="lang-badge java">Java</span>
+          <span class="article-difficulty">🟢 Beginner</span>
+          <div class="article-actions">
+            <button class="mark-read-btn" id="mrb-java-intro" onclick="toggleRead('java-intro')">☐ Mark as Read</button>
+          </div>
+        </div>
+      </div>
+      <div class="article-body clearfix">
+        <div class="infobox">
+          <div class="infobox-title">Quick Facts</div>
+          <div class="infobox-row"><span class="infobox-key">Designed by</span><span class="infobox-val">James Gosling</span></div>
+          <div class="infobox-row"><span class="infobox-key">Year</span><span class="infobox-val">1995</span></div>
+          <div class="infobox-row"><span class="infobox-key">Paradigm</span><span class="infobox-val">OOP</span></div>
+          <div class="infobox-row"><span class="infobox-key">Typing</span><span class="infobox-val">Static</span></div>
+          <div class="infobox-row"><span class="infobox-key">Runs on</span><span class="infobox-val">JVM</span></div>
+          <div class="infobox-row"><span class="infobox-key">File ext.</span><span class="infobox-val">.java</span></div>
+        </div>
+        <h2>What is Java?</h2>
+        <p>Java is a high-level, class-based, object-oriented programming language designed to have as few implementation dependencies as possible. <em>"Write Once, Run Anywhere"</em> (WORA) — compiled Java code runs on all platforms that support Java without recompilation.</p>
+        <h2>Your First Program</h2>
+        <div class="runner-wrap">
+          <div class="pre-header"><span class="pre-lang-tag">Java</span><button class="try-btn" onclick="openRunner('java-hello','java')">▶ Try It</button></div>
+          <pre><code id="java-hello"><span class="comment">// HelloWorld.java</span>
+<span class="keyword">public class</span> <span class="type">HelloWorld</span> {
+    <span class="keyword">public static void</span> <span class="fn">main</span>(<span class="type">String</span>[] args) {
+        <span class="type">System</span>.out.<span class="fn">println</span>(<span class="string">"Hello, World!"</span>);
+    }
+}</code></pre>
+        </div>
+        <h2>Data Types</h2>
+        <p>Java has two categories: <strong>primitive</strong> (<code>int</code>, <code>double</code>, <code>boolean</code>, <code>char</code>…) and <strong>reference</strong> types (objects, arrays, strings).</p>
+        <div class="runner-wrap">
+          <div class="pre-header"><span class="pre-lang-tag">Java</span><button class="try-btn" onclick="openRunner('java-types','java')">▶ Try It</button></div>
+          <pre><code id="java-types"><span class="keyword">int</span> age = <span class="number">21</span>;
+<span class="keyword">double</span> gpa = <span class="number">3.85</span>;
+<span class="type">String</span> name = <span class="string">"Alice"</span>;
+<span class="keyword">boolean</span> isStudent = <span class="keyword">true</span>;
+System.out.println(name + " | GPA: " + gpa);</code></pre>
+        </div>
+        <h2>Control Flow</h2>
+        <div class="runner-wrap">
+          <div class="pre-header"><span class="pre-lang-tag">Java</span><button class="try-btn" onclick="openRunner('java-flow','java')">▶ Try It</button></div>
+          <pre><code id="java-flow"><span class="keyword">int</span> score = <span class="number">85</span>;
+<span class="keyword">if</span> (score >= <span class="number">90</span>) {
+    System.out.println(<span class="string">"A"</span>);
+} <span class="keyword">else if</span> (score >= <span class="number">80</span>) {
+    System.out.println(<span class="string">"B"</span>);
+} <span class="keyword">else</span> {
+    System.out.println(<span class="string">"C"</span>);
+}
+<span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">1</span>; i <= <span class="number">3</span>; i++) {
+    System.out.println(<span class="string">"Loop: "</span> + i);
+}</code></pre>
+        </div>
+        <div class="tip-box"><strong>💡 Tip</strong><p>Java is case-sensitive. <code>Main</code> and <code>main</code> are different identifiers — the entry point must be <code>public static void main</code>.</p></div>
+      </div>
+    </div>
+
+    <div id="page-java-oop" class="article" data-lang="java">
+      <div class="article-header">
+        <div class="article-breadcrumb"><span onclick="showHome()">Home</span> / <span onclick="showLang('java')">Java</span> / OOP</div>
+        <div class="article-title">Object-Oriented Programming</div>
+        <div class="article-meta"><span class="lang-badge java">Java</span><span class="article-difficulty">🟡 Intermediate</span>
+          <div class="article-actions"><button class="mark-read-btn" id="mrb-java-oop" onclick="toggleRead('java-oop')">☐ Mark as Read</button></div></div>
+      </div>
+      <div class="article-body clearfix">
+        <div class="infobox"><div class="infobox-title">4 Pillars of OOP</div>
+          <div class="infobox-row"><span class="infobox-key">1.</span><span class="infobox-val">Encapsulation</span></div>
+          <div class="infobox-row"><span class="infobox-key">2.</span><span class="infobox-val">Inheritance</span></div>
+          <div class="infobox-row"><span class="infobox-key">3.</span><span class="infobox-val">Polymorphism</span></div>
+          <div class="infobox-row"><span class="infobox-key">4.</span><span class="infobox-val">Abstraction</span></div>
+        </div>
+        <h2>Classes & Objects</h2>
+        <div class="runner-wrap">
+          <div class="pre-header"><span class="pre-lang-tag">Java</span><button class="try-btn" onclick="openRunner('java-class','java')">▶ Try It</button></div>
+          <pre><code id="java-class"><span class="keyword">public class</span> <span class="type">Student</span> {
+    <span class="keyword">private</span> <span class="type">String</span> name;
+    <span class="keyword">private int</span> age;
+    <span class="keyword">public</span> <span class="fn">Student</span>(<span class="type">String</span> name, <span class="keyword">int</span> age) {
+        <span class="keyword">this</span>.name = name;
+        <span class="keyword">this</span>.age = age;
+    }
+    <span class="keyword">public</span> <span class="type">String</span> <span class="fn">getName</span>() { <span class="keyword">return</span> name; }
+    <span class="keyword">public void</span> <span class="fn">study</span>() {
+        System.out.println(name + <span class="string">" is studying!"</span>);
+    }
+}
+<span class="type">Student</span> s1 = <span class="keyword">new</span> <span class="fn">Student</span>(<span class="string">"Alice"</span>, <span class="number">20</span>);
+s1.study();</code></pre>
+        </div>
+        <h2>Inheritance</h2>
+        <div class="runner-wrap">
+          <div class="pre-header"><span class="pre-lang-tag">Java</span><button class="try-btn" onclick="openRunner('java-inherit','java')">▶ Try It</button></div>
+          <pre><code id="java-inherit"><span class="keyword">class</span> <span class="type">Animal</span> {
+    <span class="type">String</span> name;
+    <span class="keyword">void</span> <span class="fn">speak</span>() { System.out.println(name + <span class="string">" makes a sound"</span>); }
+}
+<span class="keyword">class</span> <span class="type">Dog</span> <span class="keyword">extends</span> <span class="type">Animal</span> {
+    <span class="fn">Dog</span>(<span class="type">String</span> n) { name = n; }
+    @Override
+    <span class="keyword">void</span> <span class="fn">speak</span>() { System.out.println(name + <span class="string">" says: Woof!"</span>); }
+}
+<span class="type">Dog</span> d = <span class="keyword">new</span> <span class="fn">Dog</span>(<span class="string">"Rex"</span>);
+d.speak();</code></pre>
+        </div>
+        <div class="tip-box"><strong>💡 Tip</strong><p>Use <code>private</code> fields with public getters/setters (encapsulation) to protect your object's internal state from unintended modification.</p></div>
+      </div>
+    </div>
+
+    <div id="page-java-arrays" class="article" data-lang="java">
+      <div class="article-header">
+        <div class="article-breadcrumb"><span onclick="showHome()">Home</span> / <span onclick="showLang('java')">Java</span> / Arrays</div>
+        <div class="article-title">Arrays & Collections</div>
+        <div class="article-meta"><span class="lang-badge java">Java</span><span class="article-difficulty">🟡 Intermediate</span>
+          <div class="article-actions"><button class="mark-read-btn" id="mrb-java-arrays" onclick="toggleRead('java-arrays')">☐ Mark as Read</button></div></div>
+      </div>
+      <div class="article-body">
+        <h2>Arrays</h2>
+        <div class="runner-wrap">
+          <div class="pre-header"><span class="pre-lang-tag">Java</span><button class="try-btn" onclick="openRunner('java-arr','java')">▶ Try It</button></div>
+          <pre><code id="java-arr"><span class="keyword">int</span>[] nums = {<span class="number">10</span>, <span class="number">20</span>, <span class="number">30</span>, <span class="number">40</span>};
+System.out.println(nums[<span class="number">0</span>]);
+System.out.println(<span class="string">"Length: "</span> + nums.length);
+<span class="keyword">for</span> (<span class="keyword">int</span> n : nums) System.out.print(n + <span class="string">" "</span>);</code></pre>
+        </div>
+        <h2>ArrayList & HashMap</h2>
+        <div class="runner-wrap">
+          <div class="pre-header"><span class="pre-lang-tag">Java</span><button class="try-btn" onclick="openRunner('java-list','java')">▶ Try It</button></div>
+          <pre><code id="java-list">import java.util.*;
+ArrayList&lt;String&gt; fruits = new ArrayList&lt;&gt;();
+fruits.add(<span class="string">"Apple"</span>); fruits.add(<span class="string">"Mango"</span>); fruits.add(<span class="string">"Banana"</span>);
+System.out.println(fruits);
+fruits.remove(<span class="string">"Mango"</span>);
+System.out.println(<span class="string">"After remove: "</span> + fruits);
+HashMap&lt;String,Integer&gt; grades = new HashMap&lt;&gt;();
+grades.put(<span class="string">"Alice"</span>, <span class="number">95</span>); grades.put(<span class="string">"Bob"</span>, <span class="number">87</span>);
+System.out.println(<span class="string">"Alice: "</span> + grades.get(<span class="string">"Alice"</span>));</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div id="page-java-exceptions" class="article" data-lang="java">
+      <div class="article-header">
+        <div class="article-breadcrumb"><span onclick="showHome()">Home</span> / <span onclick="showLang('java')">Java</span> / Exceptions</div>
+        <div class="article-title">Exception Handling</div>
+        <div class="article-meta"><span class="lang-badge java">Java</span><span class="article-difficulty">🟡 Intermediate</span>
+          <div class="article-actions"><button class="mark-read-btn" id="mrb-java-exceptions" onclick="toggleRead('java-exceptions')">☐ Mark as Read</button></div></div>
+      </div>
+      <div class="article-body">
+        <h2>Try / Catch / Finally</h2>
+        <p>Exceptions are runtime errors. Java uses <code>try-catch-finally</code> to handle them gracefully without crashing the program.</p>
+        <div class="runner-wrap">
+          <div class="pre-header"><span class="pre-lang-tag">Java</span><button class="try-btn" onclick="openRunner('java-exc','java')">▶ Try It</button></div>
+          <pre><code id="java-exc"><span class="keyword">try</span> {
+    <span class="keyword">int</span> result = <span class="number">10</span> / <span class="number">0</span>;
+    System.out.println(result);
+} <span class="keyword">catch</span> (ArithmeticException e) {
+    System.out.println(<span class="string">"Caught: "</span> + e.getMessage());
+} <span class="keyword">finally</span> {
+    System.out.println(<span class="string">"Finally always runs"</span>);
+}</code></pre>
+        </div>
+        <h2>Custom Exceptions</h2>
+        <div class="runner-wrap">
+          <div class="pre-header"><span class="pre-lang-tag">Java</span><button class="try-btn" onclick="openRunner('java-custom-exc','java')">▶ Try It</button></div>
+          <pre><code id="java-custom-exc"><span class="keyword">class</span> AgeException <span class="keyword">extends</span> Exception {
+    AgeException(<span class="type">String</span> msg) { <span class="keyword">super</span>(msg); }
+}
+<span class="keyword">static void</span> checkAge(<span class="keyword">int</span> age) <span class="keyword">throws</span> AgeException {
+    <span class="keyword">if</span> (age < <span class="number">18</span>) <span class="keyword">throw new</span> AgeException(<span class="string">"Too young!"</span>);
+    System.out.println(<span class="string">"Age accepted: "</span> + age);
+}
+<span class="keyword">try</span> { checkAge(<span class="number">15</span>); } <span class="keyword">catch</span> (AgeException e) { System.out.println(e.getMessage()); }
+<span class="keyword">try</span> { checkAge(<span class="number">21</span>); } <span class="keyword">catch</span> (AgeException e) { System.out.println(e.getMessage()); }</code></pre>
+        </div>
+        <div class="tip-box"><strong>💡 Tip</strong><p>Always catch the most specific exception first. Never catch <code>Exception</code> or <code>Throwable</code> unless you have a very good reason.</p></div>
+      </div>
+    </div>
+
+    <!-- ════ JS ARTICLES ════ -->
+    <div id="page-js-intro" class="article" data-lang="js">
+      <div class="article-header">
+        <div class="article-breadcrumb"><span onclick="showHome()">Home</span> / <span onclick="showLang('js')">JavaScript</span> / Introduction</div>
+        <div class="article-title">Introduction to JavaScript</div>
+        <div class="article-meta"><span class="lang-badge js">JavaScript</span><span class="article-difficulty">🟢 Beginner</span>
+          <div class="article-actions"><button class="mark-read-btn" id="mrb-js-intro" onclick="toggleRead('js-intro')">☐ Mark as Read</button></div></div>
+      </div>
+      <div class="article-body clearfix">
+        <div class="infobox"><div class="infobox-title">Quick Facts</div>
+          <div class="infobox-row"><span class="infobox-key">Created by</span><span class="infobox-val">Brendan Eich</span></div>
+          <div class="infobox-row"><span class="infobox-key">Year</span><span class="infobox-val">1995</span></div>
+          <div class="infobox-row"><span class="infobox-key">Typing</span><span class="infobox-val">Dynamic</span></div>
+          <div class="infobox-row"><span class="infobox-key">Runs in</span><span class="infobox-val">Browser / Node</span></div>
+        </div>
+        <h2>Variables & Types</h2>
+        <div class="runner-wrap">
+          <div class="pre-header"><span class="pre-lang-tag">JavaScript</span><button class="try-btn" onclick="openRunner('js-vars','js')">▶ Try It</button></div>
+          <pre><code id="js-vars"><span class="keyword">let</span> name = <span class="string">"Alice"</span>;
+<span class="keyword">const</span> PI = <span class="number">3.14159</span>;
+<span class="keyword">let</span> score = <span class="number">95</span>;
+console.log(<span class="string">`${name} scored ${score} — PI is ${PI}`</span>);
+console.log(<span class="keyword">typeof</span> name, <span class="keyword">typeof</span> score, <span class="keyword">typeof</span> <span class="keyword">true</span>);</code></pre>
+        </div>
+        <h2>Functions</h2>
+        <div class="runner-wrap">
+          <div class="pre-header"><span class="pre-lang-tag">JavaScript</span><button class="try-btn" onclick="openRunner('js-fns','js')">▶ Try It</button></div>
+          <pre><code id="js-fns"><span class="keyword">function</span> <span class="fn">greet</span>(name) {
+    <span class="keyword">return</span> <span class="string">`Hello, ${name}!`</span>;
+}
+<span class="keyword">const</span> <span class="fn">add</span> = (a, b) => a + b;
+<span class="keyword">const</span> <span class="fn">square</span> = n => n * n;
+console.log(greet(<span class="string">"Bob"</span>));
+console.log(add(<span class="number">3</span>, <span class="number">4</span>));
+console.log(square(<span class="number">5</span>));</code></pre>
+        </div>
+        <h2>Arrays & Objects</h2>
+        <div class="runner-wrap">
+          <div class="pre-header"><span class="pre-lang-tag">JavaScript</span><button class="try-btn" onclick="openRunner('js-arrobjs','js')">▶ Try It</button></div>
+          <pre><code id="js-arrobjs"><span class="keyword">const</span> langs = [<span class="string">"Java"</span>, <span class="string">"JS"</span>, <span class="string">"Python"</span>];
+langs.push(<span class="string">"Rust"</span>);
+console.log(langs.filter(l => l.length > <span class="number">3</span>));
+<span class="keyword">const</span> student = { name: <span class="string">"Alice"</span>, gpa: <span class="number">3.9</span> };
+console.log(student.name, student.gpa);</code></pre>
+        </div>
+        <div class="tip-box"><strong>💡 Tip</strong><p>Prefer <code>const</code> by default. Use <code>let</code> only when reassigning. Avoid <code>var</code> — it has confusing function-scope behavior.</p></div>
+      </div>
+    </div>
+
+    <div id="page-js-dom" class="article" data-lang="js">
+      <div class="article-header">
+        <div class="article-breadcrumb"><span onclick="showHome()">Home</span> / <span onclick="showLang('js')">JavaScript</span> / DOM</div>
+        <div class="article-title">DOM Manipulation</div>
+        <div class="article-meta"><span class="lang-badge js">JavaScript</span><span class="article-difficulty">🟡 Intermediate</span>
+          <div class="article-actions"><button class="mark-read-btn" id="mrb-js-dom" onclick="toggleRead('js-dom')">☐ Mark as Read</button></div></div>
+      </div>
+      <div class="article-body">
+        <h2>Selecting Elements</h2>
+        <div class="runner-wrap">
+          <div class="pre-header"><span class="pre-lang-tag">JavaScript</span><button class="try-btn" onclick="openRunner('js-sel','js')">▶ Try It</button></div>
+          <pre><code id="js-sel"><span class="comment">// Simulated DOM selection</span>
+<span class="keyword">const</span> el = { id: <span class="string">"myDiv"</span>, className: <span class="string">"card"</span>, textContent: <span class="string">"Hello!"</span> };
+console.log(<span class="string">"ID:"</span>, el.id);
+console.log(<span class="string">"Class:"</span>, el.className);
+<span class="comment">// In a real browser: document.getElementById("myDiv")</span>
+<span class="comment">// document.querySelector(".card")</span>
+<span class="comment">// document.querySelectorAll("p")</span></code></pre>
+        </div>
+        <h2>Modifying & Events</h2>
+        <div class="runner-wrap">
+          <div class="pre-header"><span class="pre-lang-tag">JavaScript</span><button class="try-btn" onclick="openRunner('js-events','js')">▶ Try It</button></div>
+          <pre><code id="js-events"><span class="comment">// Simulated event handling</span>
+<span class="keyword">function</span> <span class="fn">handleClick</span>(event) {
+    console.log(<span class="string">"Clicked!"</span>, event.type);
+}
+<span class="keyword">const</span> fakeEvent = { type: <span class="string">"click"</span>, target: <span class="string">"button#submit"</span> };
+handleClick(fakeEvent);
+<span class="comment">// Real: btn.addEventListener("click", handleClick)</span>
+<span class="comment">// Modify DOM: el.textContent = "New text"</span>
+<span class="comment">// el.classList.add("highlight")</span></code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div id="page-js-async" class="article" data-lang="js">
+      <div class="article-header">
+        <div class="article-breadcrumb"><span onclick="showHome()">Home</span> / <span onclick="showLang('js')">JavaScript</span> / Async</div>
+        <div class="article-title">Async & Promises</div>
+        <div class="article-meta"><span class="lang-badge js">JavaScript</span><span class="article-difficulty">🔴 Advanced</span>
+          <div class="article-actions"><button class="mark-read-btn" id="mrb-js-async" onclick="toggleRead('js-async')">☐ Mark as Read</button></div></div>
+      </div>
+      <div class="article-body">
+        <h2>Promises</h2>
+        <div class="runner-wrap">
+          <div class="pre-header"><span class="pre-lang-tag">JavaScript</span><button class="try-btn" onclick="openRunner('js-promise','js')">▶ Try It</button></div>
+          <pre><code id="js-promise"><span class="keyword">const</span> fetchData = <span class="keyword">new</span> Promise((resolve, reject) => {
+    setTimeout(() => resolve(<span class="string">"✅ Data loaded!"</span>), <span class="number">500</span>);
+});
+fetchData
+    .then(data => console.log(data))
+    .catch(err => console.error(err))
+    .finally(() => console.log(<span class="string">"Done"</span>));</code></pre>
+        </div>
+        <h2>Async / Await</h2>
+        <div class="runner-wrap">
+          <div class="pre-header"><span class="pre-lang-tag">JavaScript</span><button class="try-btn" onclick="openRunner('js-await','js')">▶ Try It</button></div>
+          <pre><code id="js-await"><span class="keyword">async function</span> <span class="fn">getUser</span>() {
+    <span class="keyword">try</span> {
+        <span class="keyword">const</span> result = <span class="keyword">await</span> <span class="keyword">new</span> Promise(res =>
+            setTimeout(() => res({ name: <span class="string">"Alice"</span>, role: <span class="string">"student"</span> }), <span class="number">300</span>)
+        );
+        console.log(<span class="string">"User:"</span>, result.name, <span class="string">"| Role:"</span>, result.role);
+    } <span class="keyword">catch</span>(e) {
+        console.error(e);
+    }
+}
+getUser();</code></pre>
+        </div>
+        <div class="tip-box"><strong>💡 Tip</strong><p>Always wrap <code>await</code> calls in <code>try/catch</code> — rejected promises that aren't caught cause unhandled rejection errors.</p></div>
+      </div>
+    </div>
+
+    <div id="page-js-es6" class="article" data-lang="js">
+      <div class="article-header">
+        <div class="article-breadcrumb"><span onclick="showHome()">Home</span> / <span onclick="showLang('js')">JavaScript</span> / ES6+</div>
+        <div class="article-title">ES6+ Features</div>
+        <div class="article-meta"><span class="lang-badge js">JavaScript</span><span class="article-difficulty">🟡 Intermediate</span>
+          <div class="article-actions"><button class="mark-read-btn" id="mrb-js-es6" onclick="toggleRead('js-es6')">☐ Mark as Read</button></div></div>
+      </div>
+      <div class="article-body">
+        <h2>Destructuring & Spread</h2>
+        <div class="runner-wrap">
+          <div class="pre-header"><span class="pre-lang-tag">JavaScript</span><button class="try-btn" onclick="openRunner('js-destruct','js')">▶ Try It</button></div>
+          <pre><code id="js-destruct"><span class="keyword">const</span> { name, age = <span class="number">18</span> } = { name: <span class="string">"Alice"</span>, age: <span class="number">22</span> };
+<span class="keyword">const</span> [first, ...rest] = [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>];
+<span class="keyword">const</span> merged = { ...{ a: <span class="number">1</span> }, ...{ b: <span class="number">2</span> }, c: <span class="number">3</span> };
+console.log(name, age);
+console.log(first, rest);
+console.log(merged);</code></pre>
+        </div>
+        <h2>Array Methods</h2>
+        <div class="runner-wrap">
+          <div class="pre-header"><span class="pre-lang-tag">JavaScript</span><button class="try-btn" onclick="openRunner('js-array-methods','js')">▶ Try It</button></div>
+          <pre><code id="js-array-methods"><span class="keyword">const</span> nums = [<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>,<span class="number">5</span>];
+console.log(nums.map(n => n * <span class="number">2</span>));
+console.log(nums.filter(n => n % <span class="number">2</span> === <span class="number">0</span>));
+console.log(nums.reduce((acc, n) => acc + n, <span class="number">0</span>));
+console.log(nums.find(n => n > <span class="number">3</span>));
+console.log(nums.every(n => n > <span class="number">0</span>));</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════ HTML ARTICLES ════ -->
+    <div id="page-html-intro" class="article" data-lang="html">
+      <div class="article-header">
+        <div class="article-breadcrumb"><span onclick="showHome()">Home</span> / <span onclick="showLang('html')">HTML</span> / Basics</div>
+        <div class="article-title">HTML Basics</div>
+        <div class="article-meta"><span class="lang-badge html">HTML</span><span class="article-difficulty">🟢 Beginner</span>
+          <div class="article-actions"><button class="mark-read-btn" id="mrb-html-intro" onclick="toggleRead('html-intro')">☐ Mark as Read</button></div></div>
+      </div>
+      <div class="article-body clearfix">
+        <div class="infobox"><div class="infobox-title">Quick Facts</div>
+          <div class="infobox-row"><span class="infobox-key">Full name</span><span class="infobox-val">HyperText Markup Language</span></div>
+          <div class="infobox-row"><span class="infobox-key">Latest</span><span class="infobox-val">HTML5</span></div>
+          <div class="infobox-row"><span class="infobox-key">Maintained by</span><span class="infobox-val">WHATWG</span></div>
+        </div>
+        <h2>Document Structure</h2>
+        <div class="runner-wrap">
+          <div class="pre-header"><span class="pre-lang-tag">HTML</span><button class="try-btn" onclick="openRunner('html-struct','html')">▶ Try It</button></div>
+          <pre><code id="html-struct"><span class="tag">&lt;!DOCTYPE html&gt;</span>
+<span class="tag">&lt;html</span> <span class="attr">lang</span>=<span class="val">"en"</span><span class="tag">&gt;</span>
+<span class="tag">&lt;head&gt;</span>
+  <span class="tag">&lt;meta</span> <span class="attr">charset</span>=<span class="val">"UTF-8"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;title&gt;</span>My Page<span class="tag">&lt;/title&gt;</span>
+<span class="tag">&lt;/head&gt;</span>
+<span class="tag">&lt;body&gt;</span>
+  <span class="tag">&lt;h1&gt;</span>Hello World<span class="tag">&lt;/h1&gt;</span>
+  <span class="tag">&lt;p&gt;</span>My first paragraph.<span class="tag">&lt;/p&gt;</span>
+<span class="tag">&lt;/body&gt;</span>
+<span class="tag">&lt;/html&gt;</span></code></pre>
+        </div>
+        <h2>Common Tags</h2>
+        <div class="runner-wrap">
+          <div class="pre-header"><span class="pre-lang-tag">HTML</span><button class="try-btn" onclick="openRunner('html-tags','html')">▶ Try It</button></div>
+          <pre><code id="html-tags"><span class="tag">&lt;h1&gt;</span>Main Title<span class="tag">&lt;/h1&gt;</span>
+<span class="tag">&lt;p&gt;</span>A paragraph of text.<span class="tag">&lt;/p&gt;</span>
+<span class="tag">&lt;a</span> <span class="attr">href</span>=<span class="val">"https://example.com"</span><span class="tag">&gt;</span>Click me<span class="tag">&lt;/a&gt;</span>
+<span class="tag">&lt;img</span> <span class="attr">src</span>=<span class="val">"photo.jpg"</span> <span class="attr">alt</span>=<span class="val">"A photo"</span><span class="tag">&gt;</span>
+<span class="tag">&lt;ul&gt;</span>
+  <span class="tag">&lt;li&gt;</span>Item 1<span class="tag">&lt;/li&gt;</span>
+  <span class="tag">&lt;li&gt;</span>Item 2<span class="tag">&lt;/li&gt;</span>
+<span class="tag">&lt;/ul&gt;</span></code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div id="page-html-forms" class="article" data-lang="html">
+      <div class="article-header">
+        <div class="article-breadcrumb"><span onclick="showHome()">Home</span> / <span onclick="showLang('html')">HTML</span> / Forms</div>
+        <div class="article-title">Forms & Inputs</div>
+        <div class="article-meta"><span class="lang-badge html">HTML</span><span class="article-difficulty">🟡 Intermediate</span>
+          <div class="article-actions"><button class="mark-read-btn" id="mrb-html-forms" onclick="toggleRead('html-forms')">☐ Mark as Read</button></div></div>
+      </div>
+      <div class="article-body">
+        <h2>Form Structure</h2>
+        <div class="runner-wrap">
+          <div class="pre-header"><span class="pre-lang-tag">HTML</span><button class="try-btn" onclick="openRunner('html-form','html')">▶ Try It</button></div>
+          <pre><code id="html-form"><span class="tag">&lt;form</span> <span class="attr">action</span>=<span class="val">"/submit"</span> <span class="attr">method</span>=<span class="val">"POST"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;label</span> <span class="attr">for</span>=<span class="val">"name"</span><span class="tag">&gt;</span>Name:<span class="tag">&lt;/label&gt;</span>
+  <span class="tag">&lt;input</span> <span class="attr">type</span>=<span class="val">"text"</span> <span class="attr">id</span>=<span class="val">"name"</span> <span class="attr">required</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;label</span> <span class="attr">for</span>=<span class="val">"email"</span><span class="tag">&gt;</span>Email:<span class="tag">&lt;/label&gt;</span>
+  <span class="tag">&lt;input</span> <span class="attr">type</span>=<span class="val">"email"</span> <span class="attr">id</span>=<span class="val">"email"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;button</span> <span class="attr">type</span>=<span class="val">"submit"</span><span class="tag">&gt;</span>Submit<span class="tag">&lt;/button&gt;</span>
+<span class="tag">&lt;/form&gt;</span></code></pre>
+        </div>
+        <div class="tip-box"><strong>💡 Accessibility</strong><p>Always pair <code>&lt;label&gt;</code> with inputs using matching <code>for</code> and <code>id</code> attributes — vital for screen readers.</p></div>
+      </div>
+    </div>
+
+    <div id="page-html-semantic" class="article" data-lang="html">
+      <div class="article-header">
+        <div class="article-breadcrumb"><span onclick="showHome()">Home</span> / <span onclick="showLang('html')">HTML</span> / Semantic</div>
+        <div class="article-title">Semantic HTML</div>
+        <div class="article-meta"><span class="lang-badge html">HTML</span><span class="article-difficulty">🟡 Intermediate</span>
+          <div class="article-actions"><button class="mark-read-btn" id="mrb-html-semantic" onclick="toggleRead('html-semantic')">☐ Mark as Read</button></div></div>
+      </div>
+      <div class="article-body">
+        <h2>Why Semantic HTML?</h2>
+        <p>Semantic elements clearly describe their meaning to the browser and developer — improving SEO, accessibility, and maintainability.</p>
+        <div class="runner-wrap">
+          <div class="pre-header"><span class="pre-lang-tag">HTML</span><button class="try-btn" onclick="openRunner('html-sem','html')">▶ Try It</button></div>
+          <pre><code id="html-sem"><span class="comment">&lt;!-- Non-semantic --&gt;</span>
+<span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="val">"header"</span><span class="tag">&gt;</span>...<span class="tag">&lt;/div&gt;</span>
+<span class="comment">&lt;!-- Semantic (preferred) --&gt;</span>
+<span class="tag">&lt;header&gt;</span>Site Logo &amp; Nav<span class="tag">&lt;/header&gt;</span>
+<span class="tag">&lt;nav&gt;</span>Navigation links<span class="tag">&lt;/nav&gt;</span>
+<span class="tag">&lt;main&gt;</span>
+  <span class="tag">&lt;article&gt;</span>Blog post content<span class="tag">&lt;/article&gt;</span>
+  <span class="tag">&lt;aside&gt;</span>Related links<span class="tag">&lt;/aside&gt;</span>
+<span class="tag">&lt;/main&gt;</span>
+<span class="tag">&lt;footer&gt;</span>Copyright info<span class="tag">&lt;/footer&gt;</span></code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div id="page-html-media" class="article" data-lang="html">
+      <div class="article-header">
+        <div class="article-breadcrumb"><span onclick="showHome()">Home</span> / <span onclick="showLang('html')">HTML</span> / Media</div>
+        <div class="article-title">Media & Embedding</div>
+        <div class="article-meta"><span class="lang-badge html">HTML</span><span class="article-difficulty">🟢 Beginner</span>
+          <div class="article-actions"><button class="mark-read-btn" id="mrb-html-media" onclick="toggleRead('html-media')">☐ Mark as Read</button></div></div>
+      </div>
+      <div class="article-body">
+        <h2>Images, Audio & Video</h2>
+        <div class="runner-wrap">
+          <div class="pre-header"><span class="pre-lang-tag">HTML</span><button class="try-btn" onclick="openRunner('html-media-code','html')">▶ Try It</button></div>
+          <pre><code id="html-media-code"><span class="comment">&lt;!-- Image --&gt;</span>
+<span class="tag">&lt;img</span> <span class="attr">src</span>=<span class="val">"photo.jpg"</span> <span class="attr">alt</span>=<span class="val">"Description"</span> <span class="attr">width</span>=<span class="val">"300"</span><span class="tag">&gt;</span>
+<span class="comment">&lt;!-- Audio --&gt;</span>
+<span class="tag">&lt;audio</span> <span class="attr">controls</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;source</span> <span class="attr">src</span>=<span class="val">"sound.mp3"</span> <span class="attr">type</span>=<span class="val">"audio/mpeg"</span><span class="tag">&gt;</span>
+<span class="tag">&lt;/audio&gt;</span>
+<span class="comment">&lt;!-- Video --&gt;</span>
+<span class="tag">&lt;video</span> <span class="attr">controls</span> <span class="attr">width</span>=<span class="val">"400"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;source</span> <span class="attr">src</span>=<span class="val">"clip.mp4"</span> <span class="attr">type</span>=<span class="val">"video/mp4"</span><span class="tag">&gt;</span>
+<span class="tag">&lt;/video&gt;</span>
+<span class="comment">&lt;!-- Embed iframe --&gt;</span>
+<span class="tag">&lt;iframe</span> <span class="attr">src</span>=<span class="val">"https://example.com"</span> <span class="attr">width</span>=<span class="val">"600"</span> <span class="attr">height</span>=<span class="val">"400"</span><span class="tag">&gt;&lt;/iframe&gt;</span></code></pre>
+        </div>
+        <div class="tip-box"><strong>💡 Tip</strong><p>Always include an <code>alt</code> attribute on images — it's required for accessibility and displays when the image fails to load.</p></div>
+      </div>
+    </div>
+
+    <!-- ════ CSS ARTICLES ════ -->
+    <div id="page-css-intro" class="article" data-lang="css">
+      <div class="article-header">
+        <div class="article-breadcrumb"><span onclick="showHome()">Home</span> / <span onclick="showLang('css')">CSS</span> / Fundamentals</div>
+        <div class="article-title">CSS Fundamentals</div>
+        <div class="article-meta"><span class="lang-badge css">CSS</span><span class="article-difficulty">🟢 Beginner</span>
+          <div class="article-actions"><button class="mark-read-btn" id="mrb-css-intro" onclick="toggleRead('css-intro')">☐ Mark as Read</button></div></div>
+      </div>
+      <div class="article-body clearfix">
+        <div class="infobox"><div class="infobox-title">Quick Facts</div>
+          <div class="infobox-row"><span class="infobox-key">Full name</span><span class="infobox-val">Cascading Style Sheets</span></div>
+          <div class="infobox-row"><span class="infobox-key">Latest</span><span class="infobox-val">CSS3</span></div>
+          <div class="infobox-row"><span class="infobox-key">Maintained by</span><span class="infobox-val">W3C</span></div>
+        </div>
+        <h2>Syntax & Selectors</h2>
+        <div class="runner-wrap">
+          <div class="pre-header"><span class="pre-lang-tag">CSS</span><button class="try-btn" onclick="openRunner('css-syntax','css')">▶ Try It</button></div>
+          <pre><code id="css-syntax"><span class="prop">h1</span> { <span class="attr">color</span>: <span class="val">#00d4ff</span>; <span class="attr">font-size</span>: <span class="val">2rem</span>; }
+<span class="prop">.card</span> { <span class="attr">background</span>: <span class="val">#111</span>; <span class="attr">border-radius</span>: <span class="val">8px</span>; <span class="attr">padding</span>: <span class="val">1rem</span>; }
+<span class="prop">#header</span> { <span class="attr">display</span>: <span class="val">flex</span>; <span class="attr">align-items</span>: <span class="val">center</span>; }
+<span class="prop">a:hover</span> { <span class="attr">color</span>: <span class="val">hotpink</span>; <span class="attr">text-decoration</span>: <span class="val">underline</span>; }
+<span class="prop">p::first-letter</span> { <span class="attr">font-size</span>: <span class="val">2em</span>; <span class="attr">color</span>: <span class="val">gold</span>; }</code></pre>
+        </div>
+        <h2>Box Model & Variables</h2>
+        <div class="runner-wrap">
+          <div class="pre-header"><span class="pre-lang-tag">CSS</span><button class="try-btn" onclick="openRunner('css-box','css')">▶ Try It</button></div>
+          <pre><code id="css-box"><span class="prop">:root</span> { <span class="attr">--primary</span>: <span class="val">#4a90e2</span>; <span class="attr">--space</span>: <span class="val">1rem</span>; }
+<span class="prop">.box</span> {
+  <span class="attr">width</span>: <span class="val">200px</span>;
+  <span class="attr">padding</span>: <span class="val">var(--space)</span>;
+  <span class="attr">border</span>: <span class="val">2px solid var(--primary)</span>;
+  <span class="attr">margin</span>: <span class="val">10px</span>;
+  <span class="attr">box-sizing</span>: <span class="val">border-box</span>;
+  <span class="attr">background</span>: <span class="val">rgba(74,144,226,0.1)</span>;
+}</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div id="page-css-flexbox" class="article" data-lang="css">
+      <div class="article-header">
+        <div class="article-breadcrumb"><span onclick="showHome()">Home</span> / <span onclick="showLang('css')">CSS</span> / Flexbox</div>
+        <div class="article-title">Flexbox Layout</div>
+        <div class="article-meta"><span class="lang-badge css">CSS</span><span class="article-difficulty">🟡 Intermediate</span>
+          <div class="article-actions"><button class="mark-read-btn" id="mrb-css-flexbox" onclick="toggleRead('css-flexbox')">☐ Mark as Read</button></div></div>
+      </div>
+      <div class="article-body">
+        <h2>Container & Item Properties</h2>
+        <div class="runner-wrap">
+          <div class="pre-header"><span class="pre-lang-tag">CSS</span><button class="try-btn" onclick="openRunner('css-flex','css')">▶ Try It</button></div>
+          <pre><code id="css-flex"><span class="prop">.container</span> {
+  <span class="attr">display</span>: <span class="val">flex</span>;
+  <span class="attr">flex-direction</span>: <span class="val">row</span>;
+  <span class="attr">justify-content</span>: <span class="val">space-between</span>;
+  <span class="attr">align-items</span>: <span class="val">center</span>;
+  <span class="attr">flex-wrap</span>: <span class="val">wrap</span>;
+  <span class="attr">gap</span>: <span class="val">1rem</span>;
+}
+<span class="prop">.item</span> { <span class="attr">flex</span>: <span class="val">1</span>; <span class="attr">min-width</span>: <span class="val">150px</span>; }
+<span class="prop">.item:first-child</span> { <span class="attr">flex</span>: <span class="val">2</span>; } <span class="comment">/* takes double space */</span></code></pre>
+        </div>
+        <div class="tip-box"><strong>💡 Remember</strong><p><code>justify-content</code> = main axis (horizontal by default). <code>align-items</code> = cross axis (vertical by default).</p></div>
+      </div>
+    </div>
+
+    <div id="page-css-grid" class="article" data-lang="css">
+      <div class="article-header">
+        <div class="article-breadcrumb"><span onclick="showHome()">Home</span> / <span onclick="showLang('css')">CSS</span> / Grid</div>
+        <div class="article-title">CSS Grid</div>
+        <div class="article-meta"><span class="lang-badge css">CSS</span><span class="article-difficulty">🟡 Intermediate</span>
+          <div class="article-actions"><button class="mark-read-btn" id="mrb-css-grid" onclick="toggleRead('css-grid')">☐ Mark as Read</button></div></div>
+      </div>
+      <div class="article-body">
+        <h2>Defining & Placing</h2>
+        <div class="runner-wrap">
+          <div class="pre-header"><span class="pre-lang-tag">CSS</span><button class="try-btn" onclick="openRunner('css-grid-code','css')">▶ Try It</button></div>
+          <pre><code id="css-grid-code"><span class="prop">.grid</span> {
+  <span class="attr">display</span>: <span class="val">grid</span>;
+  <span class="attr">grid-template-columns</span>: <span class="val">repeat(3, 1fr)</span>;
+  <span class="attr">gap</span>: <span class="val">1rem</span>;
+}
+<span class="prop">.header</span> { <span class="attr">grid-column</span>: <span class="val">1 / -1</span>; } <span class="comment">/* span all */</span>
+<span class="prop">.sidebar</span> { <span class="attr">grid-column</span>: <span class="val">1</span>; <span class="attr">grid-row</span>: <span class="val">2 / 4</span>; }
+<span class="prop">.cards</span> {
+  <span class="attr">display</span>: <span class="val">grid</span>;
+  <span class="attr">grid-template-columns</span>: <span class="val">repeat(auto-fit, minmax(200px,1fr))</span>;
+}</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div id="page-css-animations" class="article" data-lang="css">
+      <div class="article-header">
+        <div class="article-breadcrumb"><span onclick="showHome()">Home</span> / <span onclick="showLang('css')">CSS</span> / Animations</div>
+        <div class="article-title">CSS Animations</div>
+        <div class="article-meta"><span class="lang-badge css">CSS</span><span class="article-difficulty">🟡 Intermediate</span>
+          <div class="article-actions"><button class="mark-read-btn" id="mrb-css-animations" onclick="toggleRead('css-animations')">☐ Mark as Read</button></div></div>
+      </div>
+      <div class="article-body">
+        <h2>Transitions</h2>
+        <div class="runner-wrap">
+          <div class="pre-header"><span class="pre-lang-tag">CSS</span><button class="try-btn" onclick="openRunner('css-trans','css')">▶ Try It</button></div>
+          <pre><code id="css-trans"><span class="prop">.btn</span> {
+  <span class="attr">background</span>: <span class="val">#4a90e2</span>;
+  <span class="attr">color</span>: <span class="val">white</span>;
+  <span class="attr">padding</span>: <span class="val">10px 20px</span>;
+  <span class="attr">border-radius</span>: <span class="val">6px</span>;
+  <span class="attr">transition</span>: <span class="val">all 0.3s ease</span>;
+}
+<span class="prop">.btn:hover</span> {
+  <span class="attr">background</span>: <span class="val">#00d4ff</span>;
+  <span class="attr">transform</span>: <span class="val">translateY(-3px)</span>;
+  <span class="attr">box-shadow</span>: <span class="val">0 8px 20px rgba(0,212,255,0.4)</span>;
+}</code></pre>
+        </div>
+        <h2>Keyframe Animations</h2>
+        <div class="runner-wrap">
+          <div class="pre-header"><span class="pre-lang-tag">CSS</span><button class="try-btn" onclick="openRunner('css-keyframe','css')">▶ Try It</button></div>
+          <pre><code id="css-keyframe"><span class="prop">@keyframes</span> pulse {
+  <span class="val">0%</span>   { <span class="attr">transform</span>: <span class="val">scale(1)</span>; <span class="attr">opacity</span>: <span class="val">1</span>; }
+  <span class="val">50%</span>  { <span class="attr">transform</span>: <span class="val">scale(1.1)</span>; <span class="attr">opacity</span>: <span class="val">0.7</span>; }
+  <span class="val">100%</span> { <span class="attr">transform</span>: <span class="val">scale(1)</span>; <span class="attr">opacity</span>: <span class="val">1</span>; }
+}
+<span class="prop">.badge</span> {
+  <span class="attr">animation</span>: <span class="val">pulse 2s infinite ease-in-out</span>;
+}
+<span class="prop">@keyframes</span> slideIn {
+  <span class="val">from</span> { <span class="attr">transform</span>: <span class="val">translateX(-100%)</span>; <span class="attr">opacity</span>: <span class="val">0</span>; }
+  <span class="val">to</span>   { <span class="attr">transform</span>: <span class="val">translateX(0)</span>; <span class="attr">opacity</span>: <span class="val">1</span>; }
+}</code></pre>
+        </div>
+        <div class="tip-box"><strong>💡 Performance</strong><p>Animate only <code>transform</code> and <code>opacity</code> for smooth 60fps animations. Animating <code>width</code>, <code>height</code>, or <code>top</code> causes layout recalculation and is much slower.</p></div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- CODE RUNNER MODAL -->
+<div class="runner-modal" id="runner-modal">
+  <div class="runner-modal-inner">
+    <div class="rm-header">
+      <span class="rm-title" id="rm-title">▶ Try It — JavaScript</span>
+      <button class="rm-close" onclick="closeRunner()">✕</button>
+    </div>
+    <div class="rm-body">
+      <textarea class="rm-editor" id="rm-editor" spellcheck="false"></textarea>
+      <div class="rm-actions">
+        <button class="run-btn" onclick="runCode()">▶ Run</button>
+        <button class="reset-btn" onclick="resetCode()">↺ Reset</button>
+        <span style="margin-left:auto;font-size:.63rem;color:var(--muted);font-family:'IBM Plex Mono',monospace;" id="rm-note">JavaScript sandbox</span>
+      </div>
+      <div class="rm-output" id="rm-output"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── ARTICLE INDEX (for search) ──
+const ARTICLE_INDEX = [
+  {id:'java-intro',      lang:'java',  title:'Introduction to Java',     preview:'WORA, JVM, data types, control flow, Hello World'},
+  {id:'java-oop',        lang:'java',  title:'OOP Concepts',             preview:'Classes, objects, inheritance, interfaces, polymorphism'},
+  {id:'java-arrays',     lang:'java',  title:'Arrays & Collections',     preview:'Arrays, ArrayList, HashMap, dynamic lists'},
+  {id:'java-exceptions', lang:'java',  title:'Exception Handling',       preview:'try-catch-finally, custom exceptions, throws'},
+  {id:'js-intro',        lang:'js',    title:'Introduction to JavaScript',preview:'Variables, const/let, functions, arrow functions, arrays'},
+  {id:'js-dom',          lang:'js',    title:'DOM Manipulation',         preview:'getElementById, querySelector, events, addEventListener'},
+  {id:'js-async',        lang:'js',    title:'Async & Promises',         preview:'Promises, async/await, try-catch, fetch'},
+  {id:'js-es6',          lang:'js',    title:'ES6+ Features',            preview:'Destructuring, spread, map, filter, reduce'},
+  {id:'html-intro',      lang:'html',  title:'HTML Basics',              preview:'Document structure, headings, links, lists, images'},
+  {id:'html-forms',      lang:'html',  title:'Forms & Inputs',           preview:'form, input types, label, textarea, select'},
+  {id:'html-semantic',   lang:'html',  title:'Semantic HTML',            preview:'header, nav, main, article, section, footer, aside'},
+  {id:'html-media',      lang:'html',  title:'Media & Embedding',        preview:'img, audio, video, iframe, alt attribute'},
+  {id:'css-intro',       lang:'css',   title:'CSS Fundamentals',         preview:'Selectors, box model, variables, specificity'},
+  {id:'css-flexbox',     lang:'css',   title:'Flexbox Layout',           preview:'display:flex, justify-content, align-items, gap'},
+  {id:'css-grid',        lang:'css',   title:'CSS Grid',                 preview:'grid-template-columns, fr, auto-fit, grid-area'},
+  {id:'css-animations',  lang:'css',   title:'CSS Animations',           preview:'transition, keyframes, transform, opacity, animation'},
+];
+
+const LANG_COLORS = {java:'#f89820',js:'#f7df1e',html:'#e34c26',css:'#7b9cf5'};
+const LANG_NAMES  = {java:'Java',js:'JS',html:'HTML',css:'CSS'};
+const ARTICLES_BY_LANG = {
+  java:['java-intro','java-oop','java-arrays','java-exceptions'],
+  js:  ['js-intro','js-dom','js-async','js-es6'],
+  html:['html-intro','html-forms','html-semantic','html-media'],
+  css: ['css-intro','css-flexbox','css-grid','css-animations'],
+};
+
+// ── PROGRESS (localStorage) ──
+const PROGRESS_KEY = 'wiki_read_articles';
+function loadRead() {
+  try { return JSON.parse(localStorage.getItem(PROGRESS_KEY)) || []; } catch(e) { return []; }
+}
+function saveRead(arr) {
+  try { localStorage.setItem(PROGRESS_KEY, JSON.stringify(arr)); } catch(e) {}
+}
+let readArticles = loadRead();
+
+function isRead(id) { return readArticles.includes(id); }
+
+function toggleRead(id) {
+  if (isRead(id)) {
+    readArticles = readArticles.filter(a => a !== id);
+  } else {
+    readArticles.push(id);
+  }
+  saveRead(readArticles);
+  updateAllProgress();
+}
+
+function updateAllProgress() {
+  const total = ARTICLE_INDEX.length;
+  const count = readArticles.length;
+  const pct   = Math.round((count / total) * 100);
+
+  // Sidebar progress bar
+  document.getElementById('sp-fill').style.width = pct + '%';
+  document.getElementById('sp-text').textContent = `${count} / ${total} articles read`;
+
+  // Home progress bar
+  document.getElementById('hp-fill').style.width = pct + '%';
+  document.getElementById('hp-count').textContent = `${count} / ${total} read`;
+
+  // Sidebar checkmarks
+  ARTICLE_INDEX.forEach(a => {
+    const rc = document.getElementById('rc-' + a.id);
+    if (rc) rc.classList.toggle('show', isRead(a.id));
+  });
+
+  // Mark-as-read buttons
+  ARTICLE_INDEX.forEach(a => {
+    const btn = document.getElementById('mrb-' + a.id);
+    if (!btn) return;
+    if (isRead(a.id)) {
+      btn.textContent = '✓ Read';
+      btn.classList.add('read');
+    } else {
+      btn.textContent = '☐ Mark as Read';
+      btn.classList.remove('read');
+    }
+  });
+
+  // Home card read counts
+  Object.entries(ARTICLES_BY_LANG).forEach(([lang, ids]) => {
+    const done = ids.filter(id => isRead(id)).length;
+    const el = document.getElementById('home-' + lang + '-prog');
+    if (el) el.textContent = `${done} / ${ids.length} read`;
+  });
+}
+
+// ── NAVIGATION ──
+function hideAll() {
+  document.querySelectorAll('.home,.article').forEach(el => el.style.display = 'none');
+  document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
+}
+
+function showHome() {
+  hideAll();
+  document.getElementById('page-home').style.display = 'block';
+  updateAllProgress();
+}
+
+function showLang(lang) { showArticle(ARTICLES_BY_LANG[lang][0]); }
+
+function showArticle(id) {
+  hideAll();
+  const el = document.getElementById('page-' + id);
+  if (el) { el.style.display = 'block'; }
+  const si = document.querySelector(`.sidebar-item[data-id="${id}"]`);
+  if (si) si.classList.add('active');
+  updateAllProgress();
+  window.scrollTo(0, 0);
+}
+
+// ── SEARCH ──
+function handleSearch(val) {
+  const q = val.trim().toLowerCase();
+  const box = document.getElementById('search-results');
+  if (!q) { box.classList.remove('show'); return; }
+
+  const matches = ARTICLE_INDEX.filter(a =>
+    a.title.toLowerCase().includes(q) ||
+    a.preview.toLowerCase().includes(q) ||
+    a.lang.includes(q)
+  ).slice(0, 6);
+
+  if (!matches.length) {
+    box.innerHTML = '<div class="sr-empty">No results found</div>';
+  } else {
+    box.innerHTML = matches.map(a => `
+      <div class="sr-item" onclick="showArticle('${a.id}');document.getElementById('search-input').value='';hideSearch()">
+        <span class="sr-lang" style="background:${LANG_COLORS[a.lang]}22;color:${LANG_COLORS[a.lang]};border:1px solid ${LANG_COLORS[a.lang]}44">${LANG_NAMES[a.lang]}</span>
+        <div>
+          <div class="sr-title">${a.title}</div>
+          <div class="sr-preview">${a.preview}</div>
+        </div>
+      </div>
+    `).join('');
+  }
+  box.classList.add('show');
+}
+
+function hideSearch() { document.getElementById('search-results').classList.remove('show'); }
+
+// ── CODE RUNNER ──
+let currentLang = 'js';
+let originalCode = '';
+
+const CODE_CACHE = {};
+
+function getPlainCode(id) {
+  const el = document.getElementById(id);
+  if (!el) return '';
+  return el.innerText || el.textContent;
+}
+
+function openRunner(codeId, lang) {
+  currentLang = lang;
+  const code = getPlainCode(codeId);
+  originalCode = code;
+  CODE_CACHE[codeId] = code;
+  document.getElementById('rm-editor').value = code;
+  document.getElementById('rm-title').textContent = `▶ Try It — ${lang === 'java' ? 'Java (simulated)' : lang === 'html' ? 'HTML preview' : lang === 'css' ? 'CSS info' : 'JavaScript'}`;
+  document.getElementById('rm-note').textContent =
+    lang === 'java' ? 'Java simulated sandbox' :
+    lang === 'html' ? 'HTML rendered in sandbox' :
+    lang === 'css'  ? 'CSS reference view' : 'JavaScript sandbox';
+  document.getElementById('rm-output').innerHTML = '';
+  document.getElementById('rm-output').classList.remove('show');
+  document.getElementById('runner-modal').classList.add('open');
+  setTimeout(() => document.getElementById('rm-editor').focus(), 100);
+}
+
+function closeRunner() {
+  document.getElementById('runner-modal').classList.remove('open');
+}
+
+function resetCode() {
+  document.getElementById('rm-editor').value = originalCode;
+  document.getElementById('rm-output').innerHTML = '';
+  document.getElementById('rm-output').classList.remove('show');
+}
+
+function runCode() {
+  const code = document.getElementById('rm-editor').value;
+  const outEl = document.getElementById('rm-output');
+  outEl.innerHTML = '';
+  outEl.classList.add('show');
+
+  if (currentLang === 'js') {
+    runJS(code, outEl);
+  } else if (currentLang === 'java') {
+    runJavaSimulated(code, outEl);
+  } else if (currentLang === 'html') {
+    runHTML(code, outEl);
+  } else if (currentLang === 'css') {
+    outEl.innerHTML = `<div class="out-line info">// CSS is applied to styled elements — open browser DevTools to experiment live.</div>`;
+  }
+}
+
+function addLine(el, text, cls='normal') {
+  const d = document.createElement('div');
+  d.className = 'out-line ' + cls;
+  d.textContent = text;
+  el.appendChild(d);
+}
+
+function runJS(code, outEl) {
+  const logs = [];
+  const fakeConsole = {
+    log:   (...a) => logs.push({t:'normal', v:a.map(formatVal).join(' ')}),
+    error: (...a) => logs.push({t:'error',  v:'Error: '+a.join(' ')}),
+    warn:  (...a) => logs.push({t:'info',   v:'Warn: '+a.join(' ')}),
+    info:  (...a) => logs.push({t:'info',   v:a.join(' ')}),
+  };
+  try {
+    const fn = new Function('console', code);
+    fn(fakeConsole);
+    if (!logs.length) addLine(outEl, '// (no output)', 'info');
+    logs.forEach(l => addLine(outEl, l.v, l.t));
+  } catch(e) {
+    addLine(outEl, '❌ ' + e.message, 'error');
+  }
+}
+
+function formatVal(v) {
+  if (v === null) return 'null';
+  if (v === undefined) return 'undefined';
+  if (typeof v === 'object') {
+    try { return JSON.stringify(v); } catch(e) { return String(v); }
+  }
+  return String(v);
+}
+
+function runJavaSimulated(code, outEl) {
+  // Simulate Java's System.out.println / print by converting to JS
+  addLine(outEl, '// Java Simulated Output:', 'info');
+  try {
+    let js = code
+      .replace(/System\.out\.println\s*\(/g, '__print__(')
+      .replace(/System\.out\.print\s*\(/g, '__printnl__(')
+      .replace(/\/\/.*$/gm, '')
+      .replace(/public\s+(static\s+)?(void|class|String|int|double|boolean)\s+\w+[^{]*\{/g, '{')
+      .replace(/\bpublic\b|\bprivate\b|\bprotected\b|\bstatic\b|\bfinal\b/g, '')
+      .replace(/\bnew\s+\w+\s*(<[^>]*>)?\s*\(/g, '(')
+      .replace(/\bthis\.\w+/g, 'this._x')
+      .replace(/int\s+/g, 'let ').replace(/double\s+/g, 'let ')
+      .replace(/String\s+/g, 'let ').replace(/boolean\s+/g, 'let ')
+      .replace(/\bimport\b[^\n]*/g, '')
+      .replace(/@Override/g, '');
+
+    const outputs = [];
+    const fn = new Function('__print__','__printnl__', js);
+    fn(
+      v => outputs.push(String(v === undefined ? '' : v)),
+      v => outputs.push(String(v === undefined ? '' : v))
+    );
+    if (!outputs.length) addLine(outEl, '// (no output)', 'info');
+    outputs.forEach(o => addLine(outEl, o, 'success'));
+  } catch(e) {
+    addLine(outEl, '⚠ Simulation note: ' + e.message, 'error');
+    addLine(outEl, 'Tip: Java runs on the JVM — use a real IDE (IntelliJ, Eclipse) for full execution.', 'info');
+  }
+}
+
+function runHTML(code, outEl) {
+  outEl.innerHTML = '';
+  const note = document.createElement('div');
+  note.className = 'out-line info';
+  note.textContent = '// HTML Preview:';
+  outEl.appendChild(note);
+  const iframe = document.createElement('iframe');
+  iframe.style.cssText = 'width:100%;height:200px;border:none;border-radius:4px;margin-top:6px;background:white;';
+  outEl.appendChild(iframe);
+  try {
+    iframe.srcdoc = code;
+  } catch(e) {
+    addLine(outEl, '❌ ' + e.message, 'error');
+  }
+}
+
+// keyboard shortcut: Escape closes modal
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeRunner();
+});
+
+// ── INIT ──
+showHome();
+updateAllProgress();
+</script>
+</body>
+</html>

@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Level Map – CodeJourney</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:#080c14; --panel:#0e1520; --panel2:#111a2a; --panel3:#162033;
+      --border:#1c2840; --border2:#253250;
+      --accent:#00d4ff; --accent2:#0091b0;
+      --gold:#f5c842; --muted:#3a4f6b;
+      --text:#d8e6f5; --text2:#6b859e;
+      --green:#00e676; --boss:#f89820;
+      --navbar-h:48px;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);min-height:100vh;font-family:'DM Sans',sans-serif;color:var(--text);}
+
+    /* BG */
+    .bg-glow{position:fixed;inset:0;z-index:0;pointer-events:none;
+      background:radial-gradient(ellipse at 20% 20%,rgba(0,212,255,.05) 0%,transparent 50%),
+                 radial-gradient(ellipse at 80% 80%,rgba(0,145,176,.04) 0%,transparent 50%);}
+
+    /* NAVBAR */
+    .top-navbar{display:flex;align-items:center;padding:0 20px;height:var(--navbar-h);
+      border-bottom:1px solid var(--border);background:rgba(8,12,20,.95);
+      backdrop-filter:blur(12px);position:sticky;top:0;z-index:100;gap:20px;}
+    .nav-left .logo-text{font-family:'Space Mono',monospace;font-size:.9rem;font-weight:700;
+      color:var(--accent);text-shadow:0 0 14px rgba(0,212,255,.4);letter-spacing:.08em;white-space:nowrap;}
+    .nav-menu{display:flex;list-style:none;gap:2px;margin-left:10px;}
+    .nav-menu li a{display:block;padding:5px 12px;font-size:.78rem;font-weight:600;color:var(--text2);
+      text-decoration:none;border-radius:6px;border:1px solid transparent;transition:all .15s;white-space:nowrap;}
+    .nav-menu li a:hover{color:var(--text);background:rgba(255,255,255,.04);border-color:var(--border);}
+    .nav-menu li a.active{color:var(--accent);background:rgba(0,212,255,.07);border-color:rgba(0,212,255,.2);}
+    .nav-menu li a.btn-wiki{color:var(--gold);background:rgba(245,200,66,.07);border-color:rgba(245,200,66,.2);}
+    .nav-right{margin-left:auto;}
+    .nav-right .nav-profile{display:flex;align-items:center;gap:7px;padding:5px 13px;font-size:.78rem;
+      font-weight:600;color:var(--text);text-decoration:none;background:var(--panel2);
+      border:1px solid var(--border2);border-radius:7px;transition:all .15s;white-space:nowrap;}
+    .nav-right .nav-profile:hover{background:var(--panel3);border-color:rgba(0,212,255,.3);color:var(--accent);}
+
+    /* PAGE */
+    .page{max-width:900px;margin:0 auto;padding:2.5rem 1.5rem 6rem;position:relative;z-index:1;}
+
+    /* HEADER */
+    .lv-header{text-align:center;margin-bottom:2rem;}
+    .lv-label{font-size:.65rem;color:var(--accent);letter-spacing:.18em;text-transform:uppercase;
+      margin-bottom:.5rem;font-family:'Space Mono',monospace;}
+    .lv-title{font-family:'Syne',sans-serif;font-size:2.2rem;font-weight:800;color:var(--text);line-height:1.1;}
+    .lv-title em{font-style:normal;color:var(--accent);text-shadow:0 0 20px rgba(0,212,255,.3);}
+
+    /* XP BAR */
+    .xp-bar-wrap{max-width:460px;margin:1.4rem auto 0;}
+    .xp-meta{display:flex;justify-content:space-between;font-size:.68rem;color:var(--text2);
+      margin-bottom:6px;font-family:'Space Mono',monospace;}
+    .xp-track{height:8px;background:var(--panel2);border:1px solid var(--border);border-radius:99px;overflow:hidden;}
+    .xp-fill{height:100%;background:linear-gradient(90deg,var(--accent2),var(--accent));
+      border-radius:99px;transition:width .8s ease;box-shadow:0 0 10px rgba(0,212,255,.3);}
+
+    /* STATS ROW */
+    .stats-row{display:flex;gap:12px;justify-content:center;margin:1.2rem 0 2rem;flex-wrap:wrap;}
+    .stat-pill{display:flex;align-items:center;gap:7px;padding:7px 16px;
+      background:var(--panel);border:1px solid var(--border);border-radius:99px;font-size:.75rem;}
+    .stat-pill .val{font-family:'Space Mono',monospace;font-weight:700;color:var(--accent);}
+    .stat-pill .val.gold{color:var(--gold);}
+    .stat-pill .val.green{color:var(--green);}
+    .stat-pill .lbl{color:var(--text2);}
+
+    /* FILTERS */
+    .filter-row{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-bottom:2.5rem;}
+    .filter-btn{background:var(--panel2);border:1px solid var(--border);color:var(--text2);
+      font-family:'Space Mono',monospace;font-size:.65rem;letter-spacing:.06em;padding:5px 14px;
+      border-radius:99px;cursor:pointer;transition:all .15s;}
+    .filter-btn:hover{border-color:var(--border2);color:var(--text);}
+    .filter-btn.active{background:rgba(0,212,255,.08);border-color:rgba(0,212,255,.35);color:var(--accent);}
+
+    /* ── MAP TRACK ── */
+    .map-track{display:flex;flex-direction:column;gap:0;}
+
+    /* TIER */
+    .tier-section{margin-bottom:.5rem;}
+    .tier-label{font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);
+      margin-bottom:1.2rem;display:flex;align-items:center;gap:10px;
+      font-family:'Space Mono',monospace;font-weight:700;}
+    .tier-label::after{content:'';flex:1;height:1px;background:var(--border);}
+
+    /* ROW of cards */
+    .level-row{display:flex;align-items:stretch;gap:0;position:relative;margin-bottom:0;}
+
+    /* CONNECTOR between cards (horizontal) */
+    .h-connector{width:28px;flex-shrink:0;display:flex;align-items:center;justify-content:center;position:relative;}
+    .h-connector::before{content:'';position:absolute;top:50%;left:0;right:0;height:2px;
+      background:var(--border);transform:translateY(-50%);}
+    .h-connector.done::before{background:linear-gradient(90deg,var(--accent2),var(--accent));
+      box-shadow:0 0 6px rgba(0,212,255,.4);}
+    .h-connector .arrow{font-size:10px;color:var(--muted);position:relative;z-index:1;}
+    .h-connector.done .arrow{color:var(--accent);}
+
+    /* VERTICAL connector between rows */
+    .v-connector-wrap{display:flex;justify-content:flex-start;padding-left:80px;margin:0;height:40px;position:relative;}
+    .v-connector{width:2px;height:100%;background:var(--border);border-radius:2px;position:relative;}
+    .v-connector.done{background:linear-gradient(180deg,var(--accent),var(--accent2));
+      box-shadow:0 0 6px rgba(0,212,255,.3);}
+    .v-connector::after{content:'▼';position:absolute;bottom:-8px;left:50%;transform:translateX(-50%);
+      font-size:9px;color:var(--muted);}
+    .v-connector.done::after{color:var(--accent);}
+
+    /* CARD */
+    .lv-card{flex:1;min-width:130px;max-width:200px;background:var(--panel);border:1px solid var(--border);
+      border-radius:12px;padding:14px 12px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;}
+    .lv-card:hover:not(.locked){border-color:rgba(0,212,255,.3);background:var(--panel2);transform:translateY(-3px);
+      box-shadow:0 8px 24px rgba(0,0,0,.3);}
+
+    /* Completed */
+    .lv-card.completed{border-color:rgba(0,230,118,.2);background:rgba(0,230,118,.02);}
+    .lv-card.completed::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;
+      background:linear-gradient(90deg,#00a854,var(--green));box-shadow:0 0 8px rgba(0,230,118,.4);}
+
+    /* Active */
+    .lv-card.active{border-color:var(--accent);background:rgba(0,212,255,.04);}
+    .lv-card.active::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;
+      background:linear-gradient(90deg,var(--accent2),var(--accent));box-shadow:0 0 8px rgba(0,212,255,.4);}
+
+    /* Boss */
+    .lv-card.boss-card{border-color:rgba(248,152,32,.25);background:rgba(248,152,32,.03);}
+    .lv-card.boss-card:hover:not(.locked){border-color:rgba(248,152,32,.5);background:rgba(248,152,32,.06);}
+    .lv-card.boss-card.completed{border-color:rgba(248,152,32,.35);}
+
+    /* Locked */
+    .lv-card.locked{cursor:pointer;}
+    .lv-card.locked:hover{border-color:rgba(255,255,255,.08);transform:translateY(-2px);}
+    .lv-card.locked .card-inner{filter:blur(4px);opacity:.28;pointer-events:none;user-select:none;}
+    .lock-overlay{display:none;position:absolute;inset:0;align-items:center;justify-content:center;
+      flex-direction:column;gap:5px;z-index:2;}
+    .lv-card.locked .lock-overlay{display:flex;}
+    .lock-circle{width:38px;height:38px;border-radius:50%;background:rgba(8,12,20,.88);
+      border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;
+      font-size:16px;backdrop-filter:blur(6px);box-shadow:0 0 20px rgba(0,0,0,.6);}
+    .lock-txt{font-size:.48rem;font-family:'Space Mono',monospace;color:var(--muted);
+      letter-spacing:.1em;text-transform:uppercase;}
+
+    /* Card inner */
+    .card-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;}
+    .card-num{font-size:.58rem;color:var(--muted);font-weight:700;letter-spacing:.06em;font-family:'Space Mono',monospace;}
+    .card-badge{font-size:.52rem;padding:2px 6px;border-radius:99px;font-weight:700;
+      letter-spacing:.04em;font-family:'Space Mono',monospace;}
+    .badge-done{background:rgba(0,230,118,.1);color:var(--green);border:1px solid rgba(0,230,118,.25);}
+    .badge-active{background:var(--accent);color:var(--bg);}
+    .badge-boss{background:rgba(248,152,32,.12);color:var(--boss);border:1px solid rgba(248,152,32,.25);}
+    .badge-locked{background:var(--panel2);color:var(--muted);border:1px solid var(--border);}
+    .badge-play{background:rgba(0,212,255,.08);color:var(--accent);border:1px solid rgba(0,212,255,.15);}
+    .card-icon{font-size:22px;margin-bottom:6px;display:block;}
+    .card-name{font-family:'Syne',sans-serif;font-size:.82rem;font-weight:700;color:var(--text);line-height:1.2;margin-bottom:5px;}
+    .card-xp{font-size:.58rem;color:var(--text2);letter-spacing:.03em;font-family:'Space Mono',monospace;}
+    .lv-card.active .card-xp{color:rgba(0,212,255,.6);}
+    .lv-card.boss-card .card-xp{color:rgba(248,152,32,.55);}
+
+    /* Mini progress bar on card */
+    .card-prog{height:3px;background:var(--border);border-radius:99px;margin-top:8px;overflow:hidden;}
+    .card-prog-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--accent2),var(--accent));transition:width .6s ease;}
+    .lv-card.completed .card-prog-fill{background:linear-gradient(90deg,#00a854,var(--green));}
+    .lv-card.boss-card .card-prog-fill{background:var(--boss);}
+
+    /* Stars on completed */
+    .card-stars{display:flex;gap:2px;margin-top:5px;}
+    .star{font-size:10px;}
+    .star.lit{color:var(--gold);filter:drop-shadow(0 0 3px rgba(245,200,66,.5));}
+    .star.dim{color:var(--muted);}
+
+    /* Challenge badge */
+    .ch-link{font-size:.52rem;font-family:'Space Mono',monospace;color:var(--accent2);
+      margin-top:4px;display:flex;align-items:center;gap:3px;}
+    .ch-link.done{color:var(--green);}
+
+    /* MODAL */
+    .modal-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.78);
+      backdrop-filter:blur(5px);z-index:200;align-items:center;justify-content:center;}
+    .modal-backdrop.open{display:flex;}
+    .modal{background:var(--panel);border:1px solid var(--border2);border-radius:16px;
+      padding:2rem;max-width:380px;width:90%;position:relative;}
+    .modal-close{position:absolute;top:14px;right:16px;background:none;border:none;
+      color:var(--muted);font-size:18px;cursor:pointer;}
+    .modal-close:hover{color:var(--text);}
+    .modal-icon{font-size:38px;margin-bottom:10px;}
+    .modal-lv{font-size:.6rem;letter-spacing:.1em;color:var(--muted);margin-bottom:4px;font-family:'Space Mono',monospace;}
+    .modal-name{font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:800;color:var(--text);margin-bottom:8px;}
+    .modal-desc{font-size:.8rem;color:var(--text2);line-height:1.7;margin-bottom:1.2rem;}
+    .modal-stats{display:flex;gap:8px;margin-bottom:1.2rem;}
+    .mstat{flex:1;background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;text-align:center;}
+    .mstat-val{font-size:15px;font-weight:700;color:var(--accent);margin-bottom:2px;font-family:'Space Mono',monospace;}
+    .mstat-label{font-size:.55rem;color:var(--muted);letter-spacing:.08em;font-family:'Space Mono',monospace;}
+    .modal-prog-wrap{margin-bottom:1.2rem;}
+    .modal-prog-meta{display:flex;justify-content:space-between;font-size:.6rem;color:var(--muted);margin-bottom:5px;font-family:'Space Mono',monospace;}
+    .modal-prog-track{height:5px;background:var(--panel2);border-radius:99px;overflow:hidden;}
+    .modal-prog-fill{height:100%;background:linear-gradient(90deg,var(--accent2),var(--accent));border-radius:99px;box-shadow:0 0 8px rgba(0,212,255,.3);}
+    .modal-btn{width:100%;padding:11px;background:linear-gradient(135deg,var(--accent2),var(--accent));
+      border:none;border-radius:8px;color:var(--bg);font-family:'Space Mono',monospace;font-size:.72rem;
+      font-weight:700;letter-spacing:.06em;cursor:pointer;transition:all .15s;
+      box-shadow:0 0 16px rgba(0,212,255,.25);}
+    .modal-btn:hover{transform:scale(1.02);box-shadow:0 0 24px rgba(0,212,255,.4);}
+    .modal-btn.boss-btn{background:linear-gradient(135deg,#c97010,var(--boss));box-shadow:0 0 16px rgba(248,152,32,.25);}
+    .modal-btn.locked-btn{background:var(--panel2);color:var(--muted);border:1px solid var(--border2);box-shadow:none;cursor:not-allowed;}
+    .modal-btn.locked-btn:hover{transform:none;box-shadow:none;}
+    .modal-locked-banner{display:flex;align-items:flex-start;gap:10px;background:rgba(255,255,255,.03);
+      border:1px solid var(--border2);border-radius:10px;padding:12px 14px;margin-bottom:1.2rem;}
+    .lock-text{font-size:.72rem;color:var(--text2);line-height:1.5;}
+    .lock-text strong{color:var(--gold);}
+    .ch-progress-wrap{background:rgba(0,212,255,.04);border:1px solid rgba(0,212,255,.12);
+      border-radius:8px;padding:10px 12px;margin-bottom:1.2rem;}
+    .ch-progress-label{font-size:.6rem;color:var(--text2);font-family:'Space Mono',monospace;margin-bottom:6px;}
+    .ch-progress-bar{height:4px;background:var(--panel2);border-radius:99px;overflow:hidden;}
+    .ch-progress-fill{height:100%;background:linear-gradient(90deg,var(--accent2),var(--accent));border-radius:99px;}
+    .boss .mstat-val{color:var(--boss);}
+
+    @media(max-width:600px){
+      .nav-menu{display:none;}
+      .lv-title{font-size:1.6rem;}
+      .level-row{flex-wrap:wrap;}
+      .lv-card{min-width:140px;}
+    }
+  </style>
+</head>
+<body>
+<div class="bg-glow"></div>
+
+<nav class="top-navbar">
+  <div class="nav-left"><h2 class="logo-text">CodeJourney</h2></div>
+  <ul class="nav-menu">
+    <li><a href="community.html">Community</a></li>
+    <li><a href="wiki.html" class="btn-wiki">Wiki</a></li>
+    <li><a href="challenges.html">Challenges</a></li>
+    <li><a href="levels.html" class="active">Levels</a></li>
+  </ul>
+  <div class="nav-right"><a href="profile.html" class="nav-profile">👤 Profile</a></div>
+</nav>
+
+<div class="page">
+  <div class="lv-header">
+    <p class="lv-label">// your journey</p>
+    <h1 class="lv-title">Level <em>Map</em></h1>
+    <div class="xp-bar-wrap">
+      <div class="xp-meta">
+        <span id="xp-level-label">Level 1 · Beginner</span>
+        <span id="xp-amount">0 / 200 XP</span>
+      </div>
+      <div class="xp-track"><div class="xp-fill" id="xp-fill" style="width:0%"></div></div>
+    </div>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-pill"><span class="val" id="stat-completed">0</span><span class="lbl">Completed</span></div>
+    <div class="stat-pill"><span class="val gold" id="stat-stars">0</span><span class="lbl">Stars Earned</span></div>
+    <div class="stat-pill"><span class="val green" id="stat-xp">0</span><span class="lbl">Total XP</span></div>
+    <div class="stat-pill"><span class="val" id="stat-remaining">15</span><span class="lbl">Remaining</span></div>
+  </div>
+
+  <div class="filter-row">
+    <button class="filter-btn active" onclick="setFilter('all',this)">All</button>
+    <button class="filter-btn" onclick="setFilter('completed',this)">Completed</button>
+    <button class="filter-btn" onclick="setFilter('available',this)">Available</button>
+    <button class="filter-btn" onclick="setFilter('locked',this)">Locked</button>
+    <button class="filter-btn" onclick="setFilter('boss',this)">Boss Stages</button>
+  </div>
+
+  <div id="map-wrap"></div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-backdrop" id="modalBackdrop" onclick="closeModal(event)">
+  <div class="modal" id="modal">
+    <button class="modal-close" onclick="closeModalDirect()">✕</button>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<script>
+// ── LEVEL DEFINITIONS ──
+// challengeId: links to challenges.html level (1-8). null = not linked.
+const LEVELS = [
+  // BEGINNER
+  {id:1,  name:'Hello, World!',      icon:'🌱', xp:50,  topic:'Basics',          desc:'Write your first lines of code and understand how programs run.',       tasks:3,  mins:10, tier:'Beginner',     challengeId:1,  boss:false, requiresId:null},
+  {id:2,  name:'Variables & Types',  icon:'📦', xp:75,  topic:'Basics',          desc:'Learn how data is stored and what types of values exist.',              tasks:5,  mins:15, tier:'Beginner',     challengeId:3,  boss:false, requiresId:1},
+  {id:3,  name:'If & Else',          icon:'🔀', xp:80,  topic:'Logic',           desc:'Make your program decide what to do based on conditions.',              tasks:6,  mins:20, tier:'Beginner',     challengeId:null, boss:false, requiresId:2},
+  {id:4,  name:'Loops & Iteration',  icon:'🔄', xp:90,  topic:'Logic',           desc:'Repeat actions efficiently without writing duplicate code.',             tasks:7,  mins:20, tier:'Beginner',     challengeId:null, boss:false, requiresId:3},
+  {id:5,  name:'BOSS: Logic Arena',  icon:'⚔️', xp:200, topic:'Boss',            desc:'Prove your mastery of basics and logic in a timed challenge.',          tasks:1,  mins:30, tier:'Beginner',     challengeId:null, boss:true,  requiresId:4},
+  // INTERMEDIATE
+  {id:6,  name:'Functions',          icon:'🔧', xp:100, topic:'Functions',       desc:'Bundle reusable blocks of logic into named functions.',                 tasks:8,  mins:25, tier:'Intermediate', challengeId:6,  boss:false, requiresId:5},
+  {id:7,  name:'Arrays & Lists',     icon:'📋', xp:110, topic:'Data Structures', desc:'Store and manipulate collections of data efficiently.',                 tasks:8,  mins:25, tier:'Intermediate', challengeId:null, boss:false, requiresId:6},
+  {id:8,  name:'Dictionaries',       icon:'📖', xp:120, topic:'Data Structures', desc:'Map keys to values for fast lookup and structured data.',               tasks:9,  mins:30, tier:'Intermediate', challengeId:null, boss:false, requiresId:7},
+  {id:9,  name:'String Magic',       icon:'✂️', xp:100, topic:'Strings',         desc:'Manipulate text: slice, search, replace, and format strings.',          tasks:7,  mins:20, tier:'Intermediate', challengeId:null, boss:false, requiresId:8},
+  {id:10, name:'BOSS: Data Dungeon', icon:'🐉', xp:300, topic:'Boss',            desc:'Face off against complex data challenges — only the prepared survive.', tasks:1,  mins:40, tier:'Intermediate', challengeId:null, boss:true,  requiresId:9},
+  // ADVANCED
+  {id:11, name:'OOP Basics',         icon:'🧱', xp:130, topic:'OOP',             desc:'Understand objects, classes, and the blueprint model of programming.',  tasks:10, mins:35, tier:'Advanced',     challengeId:null, boss:false, requiresId:10},
+  {id:12, name:'Inheritance',        icon:'🧬', xp:140, topic:'OOP',             desc:'Extend classes to share behavior and reduce repetition.',               tasks:8,  mins:30, tier:'Advanced',     challengeId:null, boss:false, requiresId:11},
+  {id:13, name:'Error Handling',     icon:'🛡️', xp:120, topic:'Robustness',      desc:'Catch exceptions and write code that fails gracefully.',                tasks:6,  mins:25, tier:'Advanced',     challengeId:null, boss:false, requiresId:12},
+  {id:14, name:'File I/O',           icon:'💾', xp:130, topic:'Systems',         desc:'Read from and write to files to persist data.',                         tasks:7,  mins:25, tier:'Advanced',     challengeId:null, boss:false, requiresId:13},
+  {id:15, name:'BOSS: The Gauntlet', icon:'💀', xp:500, topic:'Boss',            desc:'The ultimate test. Combine everything you\'ve learned to survive.',     tasks:1,  mins:60, tier:'Advanced',     challengeId:null, boss:true,  requiresId:14},
+];
+
+const TIERS = ['Beginner','Intermediate','Advanced'];
+const TIER_ROWS = {
+  Beginner:     [[1,2,3,4],[5]],
+  Intermediate: [[6,7,8,9],[10]],
+  Advanced:     [[11,12,13,14],[15]],
+};
+
+const LEVEL_THRESHOLDS = [0,200,450,750,1100,1500,2000,2600,3300,4000];
+const LEVEL_TITLES     = ['Beginner','Apprentice','Coder','Developer','Engineer','Architect','Expert','Master','Legend','Grandmaster'];
+
+// ── LOAD PROGRESS FROM localStorage ──
+function loadProgress() {
+  try {
+    const user = localStorage.getItem('cj_current_user');
+    const key  = user ? 'cj_progress_' + user : 'cj_progress';
+    const raw  = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : {levelStars:{}, perfectLevels:[], bestStreak:0, totalXP:0};
+  } catch(e) { return {levelStars:{}, perfectLevels:[], bestStreak:0, totalXP:0}; }
+}
+
+// ── DERIVE LEVEL STATUS from progress ──
+// A level is "completed" if its linked challenge is done OR previous completed + override
+function getLevelStatus(lv, progress) {
+  const stars = progress.levelStars;
+
+  // Check if linked challenge is completed
+  const chDone = lv.challengeId ? !!stars[String(lv.challengeId)] : false;
+
+  // Check if previous level is completed
+  const prevDone = lv.requiresId === null ? true : isLevelCompleted(lv.requiresId, progress);
+
+  if (chDone) return 'completed';
+  if (!prevDone) return 'locked';
+
+  // No challenge link — treat as available if prev done
+  return 'available';
+}
+
+function isLevelCompleted(id, progress) {
+  const lv = LEVELS.find(l => l.id === id);
+  if (!lv) return false;
+  if (lv.challengeId) return !!progress.levelStars[String(lv.challengeId)];
+  // Boss / non-challenge levels: completed if next tier's first is unlocked
+  // For now, completed if all requiresId chain before it is done
+  const req = lv.requiresId;
+  if (req === null) return false; // level 1 never auto-completes without challenge
+  return isLevelCompleted(req, progress);
+}
+
+function getLevelProgress(lv, progress) {
+  if (!lv.challengeId) return 0;
+  const stars = progress.levelStars[String(lv.challengeId)];
+  return stars !== undefined ? 100 : 0;
+}
+
+function getLevelStars(lv, progress) {
+  if (!lv.challengeId) return 0;
+  return progress.levelStars[String(lv.challengeId)] || 0;
+}
+
+// ── XP + PLAYER LEVEL ──
+function computePlayerLevel(xp) {
+  let lvl = 1;
+  for (let i = 1; i < LEVEL_THRESHOLDS.length; i++) {
+    if (xp >= LEVEL_THRESHOLDS[i]) lvl = i + 1; else break;
+  }
+  return lvl;
+}
+
+// ── RENDER STATS HEADER ──
+function renderStats(progress) {
+  const xp = progress.totalXP || 0;
+  const plvl = computePlayerLevel(xp);
+  const title = LEVEL_TITLES[Math.min(plvl - 1, LEVEL_TITLES.length - 1)];
+  const xpFloor = LEVEL_THRESHOLDS[Math.min(plvl - 1, LEVEL_THRESHOLDS.length - 1)];
+  const xpCeil  = LEVEL_THRESHOLDS[Math.min(plvl, LEVEL_THRESHOLDS.length - 1)] || xpFloor + 500;
+  const pct = Math.min(((xp - xpFloor) / (xpCeil - xpFloor)) * 100, 100);
+
+  document.getElementById('xp-level-label').textContent = `Level ${plvl} · ${title}`;
+  document.getElementById('xp-amount').textContent = `${xp} / ${xpCeil} XP`;
+  document.getElementById('xp-fill').style.width = pct + '%';
+
+  const completed = LEVELS.filter(l => getLevelStatus(l, progress) === 'completed').length;
+  const totalStars = LEVELS.reduce((s, l) => s + getLevelStars(l, progress), 0);
+  const remaining  = LEVELS.length - completed;
+
+  document.getElementById('stat-completed').textContent = completed;
+  document.getElementById('stat-stars').textContent     = totalStars + ' ★';
+  document.getElementById('stat-xp').textContent        = xp;
+  document.getElementById('stat-remaining').textContent = remaining;
+}
+
+// ── BUILD CARD HTML ──
+function buildCard(lv, status, progress) {
+  const stars   = getLevelStars(lv, progress);
+  const prog    = getLevelProgress(lv, progress);
+  const isLocked = status === 'locked';
+  const isDone   = status === 'completed';
+  const isActive = status === 'available' && !isLocked;
+
+  let cls = 'lv-card';
+  if (isDone)   cls += ' completed';
+  else if (isActive && !lv.boss) cls += ' active';
+  if (lv.boss)  cls += ' boss-card';
+  if (isLocked) cls += ' locked';
+
+  let badge = '';
+  if (isDone)        badge = `<span class="card-badge badge-done">✓ DONE</span>`;
+  else if (isActive && lv.boss) badge = `<span class="card-badge badge-boss">BOSS</span>`;
+  else if (isActive) badge = `<span class="card-badge badge-play">PLAY</span>`;
+  else if (lv.boss && isLocked) badge = `<span class="card-badge badge-boss">BOSS</span>`;
+  else               badge = `<span class="card-badge badge-locked">🔒</span>`;
+
+  const starHtml = isDone ? `<div class="card-stars">
+    ${[0,1,2].map(i=>`<span class="star ${i<stars?'lit':'dim'}">★</span>`).join('')}
+  </div>` : '';
+
+  const chLink = lv.challengeId
+    ? `<div class="ch-link ${isDone?'done':''}">
+        ${isDone ? '✓' : '→'} Challenge ${lv.challengeId}
+       </div>`
+    : '';
+
+  const card = document.createElement('div');
+  card.className = cls;
+  card.innerHTML = `
+    <div class="lock-overlay">
+      <div class="lock-circle">🔒</div>
+      <span class="lock-txt">Locked</span>
+    </div>
+    <div class="card-inner">
+      <div class="card-top">
+        <span class="card-num">LV.${String(lv.id).padStart(2,'0')}</span>
+        ${badge}
+      </div>
+      <span class="card-icon">${lv.icon}</span>
+      <div class="card-name">${lv.name}</div>
+      <div class="card-xp">+${lv.xp} XP · ${lv.mins}min</div>
+      ${starHtml}
+      ${chLink}
+      ${prog > 0 || isDone ? `<div class="card-prog"><div class="card-prog-fill" style="width:${isDone?100:prog}%"></div></div>` : ''}
+    </div>
+  `;
+
+  card.onclick = () => isLocked ? openLockedModal(lv, progress) : openModal(lv, status, progress);
+  return card;
+}
+
+// ── RENDER MAP ──
+let currentFilter = 'all';
+let cachedProgress = null;
+
+function renderMap(progress) {
+  cachedProgress = progress;
+  const wrap = document.getElementById('map-wrap');
+  wrap.innerHTML = '';
+
+  TIERS.forEach(tier => {
+    const rows = TIER_ROWS[tier];
+    const tierLevels = LEVELS.filter(l => l.tier === tier);
+
+    // Filter check: does this tier have any matching levels?
+    const hasVisible = tierLevels.some(l => {
+      const st = getLevelStatus(l, progress);
+      return matchesFilter(l, st);
+    });
+    if (!hasVisible) return;
+
+    const section = document.createElement('div');
+    section.className = 'tier-section';
+    section.innerHTML = `<div class="tier-label">${tier.toUpperCase()}</div>`;
+
+    rows.forEach((rowIds, rowIdx) => {
+      // vertical connector before this row (except first)
+      if (rowIdx > 0) {
+        const vcWrap = document.createElement('div');
+        vcWrap.className = 'v-connector-wrap';
+        // connector is "done" if the last card of previous row is completed
+        const prevRowLastId = rows[rowIdx-1][rows[rowIdx-1].length - 1];
+        const prevLv = LEVELS.find(l => l.id === prevRowLastId);
+        const prevDone = prevLv && getLevelStatus(prevLv, progress) === 'completed';
+        const vc = document.createElement('div');
+        vc.className = 'v-connector' + (prevDone ? ' done' : '');
+        vcWrap.appendChild(vc);
+        section.appendChild(vcWrap);
+      }
+
+      const rowEl = document.createElement('div');
+      rowEl.className = 'level-row';
+
+      rowIds.forEach((lvId, idx) => {
+        const lv     = LEVELS.find(l => l.id === lvId);
+        const status = getLevelStatus(lv, progress);
+        const visible = matchesFilter(lv, status);
+
+        const card = buildCard(lv, status, progress);
+        if (!visible) card.style.display = 'none';
+        rowEl.appendChild(card);
+
+        // Horizontal connector (not after last card in row)
+        if (idx < rowIds.length - 1) {
+          const conn = document.createElement('div');
+          const nextLv = LEVELS.find(l => l.id === rowIds[idx+1]);
+          const thisDone = status === 'completed';
+          conn.className = 'h-connector' + (thisDone ? ' done' : '');
+          conn.innerHTML = `<span class="arrow">›</span>`;
+          rowEl.appendChild(conn);
+        }
+      });
+
+      section.appendChild(rowEl);
+    });
+
+    // Add margin between tiers
+    section.style.marginBottom = '2.5rem';
+    wrap.appendChild(section);
+  });
+}
+
+function matchesFilter(lv, status) {
+  if (currentFilter === 'all')       return true;
+  if (currentFilter === 'completed') return status === 'completed';
+  if (currentFilter === 'available') return status === 'available';
+  if (currentFilter === 'locked')    return status === 'locked';
+  if (currentFilter === 'boss')      return lv.boss;
+  return true;
+}
+
+function setFilter(f, btn) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  if (cachedProgress) renderMap(cachedProgress);
+}
+
+// ── MODALS ──
+function openModal(lv, status, progress) {
+  const isBoss  = lv.boss;
+  const isDone  = status === 'completed';
+  const stars   = getLevelStars(lv, progress);
+  const starHtml = `<div style="display:flex;gap:4px;margin-bottom:12px;">
+    ${[0,1,2].map(i=>`<span style="font-size:18px;${i<stars?'color:var(--gold);filter:drop-shadow(0 0 4px rgba(245,200,66,.5))':'color:var(--muted)'}">★</span>`).join('')}
+  </div>`;
+
+  const btnLabel = isDone ? 'REPLAY ↺' : 'START →';
+  const btnCls   = isBoss ? 'modal-btn boss-btn' : 'modal-btn';
+  const bossClass = isBoss ? ' boss' : '';
+  const chInfo   = lv.challengeId
+    ? `<div style="font-size:.72rem;color:var(--text2);margin-bottom:1rem;padding:8px 12px;background:rgba(0,212,255,.04);border:1px solid rgba(0,212,255,.12);border-radius:8px;">
+        🔗 Linked to <strong style="color:var(--accent)">Challenge Level ${lv.challengeId}</strong>${isDone?' — ✓ Completed':''}
+       </div>`
+    : '';
+
+  document.getElementById('modal-body').innerHTML = `
+    <div class="modal-icon">${lv.icon}</div>
+    <div class="modal-lv">LEVEL ${lv.id} · ${lv.topic.toUpperCase()}</div>
+    <div class="modal-name">${lv.name}</div>
+    ${isDone ? starHtml : ''}
+    <div class="modal-desc">${lv.desc}</div>
+    ${chInfo}
+    <div class="modal-stats${bossClass}">
+      <div class="mstat"><div class="mstat-val">+${lv.xp}</div><div class="mstat-label">XP REWARD</div></div>
+      <div class="mstat"><div class="mstat-val">${lv.tasks}</div><div class="mstat-label">TASKS</div></div>
+      <div class="mstat"><div class="mstat-val">${lv.mins}m</div><div class="mstat-label">AVG TIME</div></div>
+    </div>
+    <button class="${btnCls}" onclick="window.location.href='challenges.html'">${lv.challengeId ? '→ GO TO CHALLENGE' : btnLabel}</button>
+  `;
+  document.getElementById('modalBackdrop').classList.add('open');
+}
+
+function openLockedModal(lv, progress) {
+  const req = lv.requiresId ? LEVELS.find(l => l.id === lv.requiresId) : null;
+  const bossClass = lv.boss ? ' boss' : '';
+  document.getElementById('modal-body').innerHTML = `
+    <div class="modal-icon">🔒</div>
+    <div class="modal-lv">LEVEL ${lv.id} · ${lv.topic.toUpperCase()}</div>
+    <div class="modal-name">${lv.name}</div>
+    <div class="modal-locked-banner">
+      <span style="font-size:20px;flex-shrink:0">⛔</span>
+      <div class="lock-text">
+        This level is locked. Complete<br>
+        <strong>${req ? 'Level ' + req.id + ' — ' + req.name : 'the previous level'}</strong>
+        first to unlock it.
+      </div>
+    </div>
+    <div class="modal-stats${bossClass}">
+      <div class="mstat"><div class="mstat-val">+${lv.xp}</div><div class="mstat-label">XP REWARD</div></div>
+      <div class="mstat"><div class="mstat-val">${lv.tasks}</div><div class="mstat-label">TASKS</div></div>
+      <div class="mstat"><div class="mstat-val">${lv.mins}m</div><div class="mstat-label">AVG TIME</div></div>
+    </div>
+    <button class="modal-btn" onclick="window.location.href='challenges.html'">→ GO TO CHALLENGES</button>
+  `;
+  document.getElementById('modalBackdrop').classList.add('open');
+}
+
+function closeModal(e) { if(e.target===document.getElementById('modalBackdrop')) closeModalDirect(); }
+function closeModalDirect() { document.getElementById('modalBackdrop').classList.remove('open'); }
+
+// ── INIT ──
+function init() {
+  const progress = loadProgress();
+  renderStats(progress);
+  renderMap(progress);
+}
+
+// Re-read progress when tab gets focus (user may have just finished a challenge)
+window.addEventListener('focus', init);
+init();
+</script>
+</body>
+</html>

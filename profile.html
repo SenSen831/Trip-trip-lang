@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profile – CodeJourney</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:      #080c14;
+      --panel:   #0e1520;
+      --panel2:  #111a2a;
+      --panel3:  #162033;
+      --border:  #1c2840;
+      --border2: #253250;
+      --accent:  #00d4ff;
+      --accent2: #0091b0;
+      --gold:    #f5c842;
+      --muted:   #3a4f6b;
+      --text:    #d8e6f5;
+      --text2:   #6b859e;
+      --green:   #00e676;
+      --boss:    #f89820;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      min-height: 100vh;
+      font-family: 'DM Sans', sans-serif;
+      color: var(--text);
+    }
+
+    /* ── NAVBAR ── */
+    .top-navbar {
+      display: flex; align-items: center;
+      padding: 0 20px; height: 48px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(8,12,20,0.92);
+      backdrop-filter: blur(12px);
+      position: sticky; top: 0; z-index: 100; gap: 20px;
+    }
+    .nav-left .logo-text {
+      font-family: 'Space Mono', monospace; font-size: 0.9rem; font-weight: 700;
+      color: var(--accent); text-shadow: 0 0 14px rgba(0,212,255,0.4);
+      letter-spacing: 0.08em; white-space: nowrap;
+    }
+    .nav-menu { display: flex; list-style: none; gap: 2px; margin-left: 10px; }
+    .nav-menu li a {
+      display: block; padding: 5px 12px; font-size: 0.78rem; font-weight: 600;
+      color: var(--text2); text-decoration: none; border-radius: 6px;
+      border: 1px solid transparent; transition: all 0.15s;
+      letter-spacing: 0.02em; white-space: nowrap; font-family: 'DM Sans', sans-serif;
+    }
+    .nav-menu li a:hover { color: var(--text); background: rgba(255,255,255,0.04); border-color: var(--border); }
+    .nav-menu li a.active { color: var(--accent); background: rgba(0,212,255,0.07); border-color: rgba(0,212,255,0.2); }
+    .nav-menu li a.btn-wiki { color: var(--gold); background: rgba(245,200,66,0.07); border-color: rgba(245,200,66,0.2); }
+    .nav-menu li a.btn-wiki:hover { background: rgba(245,200,66,0.12); border-color: rgba(245,200,66,0.35); }
+    .nav-right { margin-left: auto; }
+    .nav-right .nav-profile {
+      display: flex; align-items: center; gap: 7px; padding: 5px 13px;
+      font-size: 0.78rem; font-weight: 600; color: var(--accent);
+      text-decoration: none; background: rgba(0,212,255,0.07);
+      border: 1px solid rgba(0,212,255,0.2); border-radius: 7px;
+      white-space: nowrap; font-family: 'DM Sans', sans-serif;
+    }
+
+    /* ── PAGE ── */
+    .page { max-width: 860px; margin: 0 auto; padding: 2.5rem 1.5rem 5rem; }
+
+    /* ── PROFILE HERO ── */
+    .profile-hero {
+      display: flex; align-items: center; gap: 24px;
+      background: var(--panel); border: 1px solid var(--border);
+      border-radius: 16px; padding: 24px 28px; margin-bottom: 2rem;
+      position: relative; overflow: hidden;
+    }
+    .profile-hero::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, var(--accent2), var(--accent), var(--gold));
+    }
+    .avatar {
+      width: 72px; height: 72px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent2), var(--accent));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2rem; flex-shrink: 0; border: 3px solid rgba(0,212,255,0.3);
+      box-shadow: 0 0 24px rgba(0,212,255,0.2);
+    }
+    .hero-info { flex: 1; min-width: 0; }
+    .hero-name {
+      font-family: 'Syne', sans-serif; font-size: 1.5rem; font-weight: 800;
+      color: var(--text); margin-bottom: 3px;
+    }
+    .hero-role {
+      font-size: 0.72rem; color: var(--accent); font-family: 'Space Mono', monospace;
+      letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 12px;
+    }
+    .hero-xp-wrap { max-width: 340px; }
+    .hero-xp-meta {
+      display: flex; justify-content: space-between;
+      font-size: 0.65rem; color: var(--text2); margin-bottom: 5px;
+      font-family: 'Space Mono', monospace;
+    }
+    .hero-xp-track {
+      height: 6px; background: var(--panel2); border: 1px solid var(--border);
+      border-radius: 99px; overflow: hidden;
+    }
+    .hero-xp-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent2), var(--accent));
+      border-radius: 99px; transition: width 0.8s ease;
+      box-shadow: 0 0 10px rgba(0,212,255,0.3);
+    }
+    .hero-stats {
+      display: flex; gap: 20px; flex-shrink: 0;
+    }
+    .hstat { text-align: center; }
+    .hstat-val {
+      font-family: 'Space Mono', monospace; font-size: 1.2rem; font-weight: 700;
+      color: var(--text); display: block;
+    }
+    .hstat-val.gold { color: var(--gold); }
+    .hstat-val.green { color: var(--green); }
+    .hstat-lbl { font-size: 0.58rem; color: var(--text2); letter-spacing: 0.08em; text-transform: uppercase; font-family: 'Space Mono', monospace; }
+
+    /* ── SECTION HEADER ── */
+    .section-head {
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 1.2rem; margin-top: 2rem;
+    }
+    .section-head-label {
+      font-size: 0.6rem; letter-spacing: 0.15em; text-transform: uppercase;
+      color: var(--muted); font-family: 'Space Mono', monospace; font-weight: 700;
+    }
+    .section-head::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+    .section-count {
+      font-size: 0.58rem; color: var(--accent); font-family: 'Space Mono', monospace;
+      background: rgba(0,212,255,0.08); border: 1px solid rgba(0,212,255,0.2);
+      padding: 2px 8px; border-radius: 99px;
+    }
+
+    /* ── FILTER ROW ── */
+    .filter-row {
+      display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 1.5rem;
+    }
+    .filter-btn {
+      background: var(--panel2); border: 1px solid var(--border);
+      color: var(--text2); font-family: 'Space Mono', monospace;
+      font-size: 0.62rem; letter-spacing: 0.06em; padding: 5px 14px;
+      border-radius: 99px; cursor: pointer; transition: all 0.15s;
+    }
+    .filter-btn:hover { border-color: var(--border2); color: var(--text); }
+    .filter-btn.active {
+      background: rgba(0,212,255,0.08); border-color: rgba(0,212,255,0.35);
+      color: var(--accent);
+    }
+
+    /* ── ACHIEVEMENTS GRID ── */
+    .ach-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 12px;
+    }
+
+    /* ── ACHIEVEMENT CARD ── */
+    .ach-card {
+      background: var(--panel); border: 1px solid var(--border);
+      border-radius: 12px; padding: 16px; position: relative;
+      overflow: hidden; transition: all 0.2s; cursor: default;
+    }
+    .ach-card.unlocked {
+      border-color: rgba(245,200,66,0.25);
+      background: linear-gradient(135deg, var(--panel), rgba(245,200,66,0.03));
+    }
+    .ach-card.unlocked:hover {
+      border-color: rgba(245,200,66,0.45);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px rgba(245,200,66,0.08);
+    }
+    .ach-card.unlocked::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, var(--gold), rgba(245,200,66,0.3));
+    }
+
+    /* Locked card: blurred content + lock overlay */
+    .ach-card.locked {
+      cursor: pointer;
+    }
+    .ach-card.locked:hover {
+      border-color: rgba(255,255,255,0.08);
+      transform: translateY(-2px);
+    }
+    .ach-card.locked .ach-inner {
+      filter: blur(5px);
+      opacity: 0.25;
+      pointer-events: none;
+      user-select: none;
+    }
+    .ach-lock-overlay {
+      display: none;
+      position: absolute; inset: 0;
+      align-items: center; justify-content: center;
+      flex-direction: column; gap: 6px; z-index: 2;
+    }
+    .ach-card.locked .ach-lock-overlay { display: flex; }
+    .ach-lock-circle {
+      width: 44px; height: 44px; border-radius: 50%;
+      background: rgba(8,12,20,0.88); border: 1px solid var(--border2);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; backdrop-filter: blur(6px);
+      box-shadow: 0 0 20px rgba(0,0,0,0.6);
+    }
+    .ach-lock-text {
+      font-size: 0.5rem; font-family: 'Space Mono', monospace;
+      color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase;
+    }
+    .ach-lock-req {
+      font-size: 0.52rem; font-family: 'Space Mono', monospace;
+      color: rgba(107,133,158,0.7); letter-spacing: 0.05em;
+      text-align: center; max-width: 160px; line-height: 1.4;
+    }
+
+    /* Card inner content */
+    .ach-inner { display: flex; align-items: flex-start; gap: 12px; }
+    .ach-icon-wrap {
+      width: 46px; height: 46px; border-radius: 10px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+      background: var(--panel2); border: 1px solid var(--border);
+    }
+    .ach-card.unlocked .ach-icon-wrap {
+      background: rgba(245,200,66,0.08); border-color: rgba(245,200,66,0.2);
+    }
+    .ach-info { flex: 1; min-width: 0; }
+    .ach-name {
+      font-family: 'Syne', sans-serif; font-size: 0.88rem; font-weight: 700;
+      color: var(--text); margin-bottom: 4px; line-height: 1.2;
+    }
+    .ach-card.unlocked .ach-name { color: var(--gold); }
+    .ach-desc {
+      font-size: 0.72rem; color: var(--text2); line-height: 1.5;
+    }
+    .ach-meta {
+      display: flex; align-items: center; gap: 6px; margin-top: 8px;
+    }
+    .ach-tag {
+      font-size: 0.55rem; padding: 2px 8px; border-radius: 99px;
+      font-family: 'Space Mono', monospace; font-weight: 700; letter-spacing: 0.04em;
+    }
+    .tag-challenge { background: rgba(0,212,255,0.08); color: var(--accent); border: 1px solid rgba(0,212,255,0.18); }
+    .tag-mastery   { background: rgba(245,200,66,0.08); color: var(--gold);   border: 1px solid rgba(245,200,66,0.2); }
+    .tag-streak    { background: rgba(248,152,32,0.08); color: var(--boss);   border: 1px solid rgba(248,152,32,0.2); }
+    .tag-category  { background: rgba(0,230,118,0.08);  color: var(--green);  border: 1px solid rgba(0,230,118,0.2); }
+    .tag-master    { background: rgba(245,200,66,0.12); color: var(--gold);   border: 1px solid rgba(245,200,66,0.3); }
+
+    .ach-unlocked-at {
+      font-size: 0.55rem; color: var(--muted); font-family: 'Space Mono', monospace;
+      margin-left: auto;
+    }
+
+    /* Unlocked checkmark badge */
+    .ach-check {
+      position: absolute; top: 10px; right: 12px;
+      width: 20px; height: 20px; border-radius: 50%;
+      background: var(--gold); display: none;
+      align-items: center; justify-content: center;
+      font-size: 10px; color: var(--bg); font-weight: 900;
+      box-shadow: 0 0 10px rgba(245,200,66,0.4);
+    }
+    .ach-card.unlocked .ach-check { display: flex; }
+
+    /* ── CHALLENGE PROGRESS SECTION ── */
+    .challenge-progress-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px;
+    }
+    .cp-card {
+      background: var(--panel); border: 1px solid var(--border);
+      border-radius: 10px; padding: 12px 14px;
+    }
+    .cp-card.done { border-color: rgba(0,230,118,0.2); background: rgba(0,230,118,0.02); }
+    .cp-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .cp-name { font-size: 0.78rem; font-weight: 600; color: var(--text); }
+    .cp-stars { font-size: 0.7rem; letter-spacing: 1px; }
+    .cp-bar-wrap { height: 4px; background: var(--border); border-radius: 99px; overflow: hidden; }
+    .cp-bar-fill {
+      height: 100%; border-radius: 99px;
+      background: linear-gradient(90deg, var(--accent2), var(--accent));
+      transition: width 0.6s ease;
+    }
+    .cp-card.done .cp-bar-fill { background: linear-gradient(90deg, #00a854, var(--green)); }
+    .cp-label { font-size: 0.58rem; color: var(--text2); margin-top: 5px; font-family: 'Space Mono', monospace; }
+
+    /* ── LOCKED MODAL ── */
+    .modal-backdrop {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.75); backdrop-filter: blur(4px);
+      z-index: 200; align-items: center; justify-content: center;
+    }
+    .modal-backdrop.open { display: flex; }
+    .modal {
+      background: var(--panel); border: 1px solid var(--border2);
+      border-radius: 16px; padding: 2rem; max-width: 360px;
+      width: 90%; position: relative;
+    }
+    .modal-close {
+      position: absolute; top: 14px; right: 16px; background: none;
+      border: none; color: var(--muted); font-size: 18px; cursor: pointer;
+    }
+    .modal-close:hover { color: var(--text); }
+    .modal-icon { font-size: 38px; margin-bottom: 10px; }
+    .modal-name {
+      font-family: 'Syne', sans-serif; font-size: 1.2rem; font-weight: 800;
+      color: var(--text); margin-bottom: 6px;
+    }
+    .modal-desc { font-size: 0.8rem; color: var(--text2); line-height: 1.7; margin-bottom: 1rem; }
+    .modal-req-banner {
+      display: flex; align-items: flex-start; gap: 10px;
+      background: rgba(255,255,255,0.03); border: 1px solid var(--border2);
+      border-radius: 10px; padding: 12px 14px; margin-bottom: 1.2rem;
+    }
+    .modal-req-banner .req-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+    .modal-req-text { font-size: 0.75rem; color: var(--text2); line-height: 1.6; }
+    .modal-req-text strong { color: var(--gold); }
+    .modal-go-btn {
+      width: 100%; padding: 11px;
+      background: linear-gradient(135deg, var(--accent2), var(--accent));
+      border: none; border-radius: 8px; color: var(--bg);
+      font-family: 'Space Mono', monospace; font-size: 0.72rem;
+      font-weight: 700; letter-spacing: 0.06em; cursor: pointer;
+      transition: all 0.15s; box-shadow: 0 0 16px rgba(0,212,255,0.25);
+    }
+    .modal-go-btn:hover { transform: scale(1.02); box-shadow: 0 0 24px rgba(0,212,255,0.4); }
+    .modal-locked-btn {
+      width: 100%; padding: 11px;
+      background: var(--panel2); color: var(--muted);
+      border: 1px solid var(--border2); border-radius: 8px;
+      font-family: 'Space Mono', monospace; font-size: 0.72rem;
+      font-weight: 700; cursor: not-allowed;
+    }
+
+    /* ── EMPTY STATE ── */
+    .empty-state {
+      text-align: center; padding: 3rem 1rem; color: var(--muted);
+      font-size: 0.82rem; font-family: 'Space Mono', monospace;
+    }
+    .empty-state .empty-icon { font-size: 2rem; margin-bottom: 10px; display: block; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 640px) {
+      .nav-menu { display: none; }
+      .profile-hero { flex-direction: column; align-items: flex-start; }
+      .hero-stats { gap: 14px; }
+      .ach-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="top-navbar">
+    <div class="nav-left"><h2 class="logo-text">CodeJourney</h2></div>
+    <ul class="nav-menu">
+      <li><a href="community.html">Community</a></li>
+      <li><a href="wiki.html" class="btn-wiki">Wiki</a></li>
+      <li><a href="challenges.html">Challenges</a></li>
+      <li><a href="levels.html">Levels</a></li>
+    </ul>
+    <div class="nav-right" style="display:flex;align-items:center;gap:8px;">
+      <span id="nav-user" style="font-size:0.7rem;color:var(--text2);font-family:'Space Mono',monospace;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
+      <a href="profile.html" class="nav-profile">👤 Profile</a>
+      <button onclick="logOut()" style="padding:5px 12px;font-size:0.72rem;font-weight:700;font-family:'Space Mono',monospace;background:transparent;border:1px solid var(--border2);color:var(--text2);border-radius:7px;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.borderColor='var(--red)';this.style.color='var(--red)'" onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--text2)'">⏏ Logout</button>
+    </div>
+  </nav>
+
+  <div class="page">
+
+    <!-- HERO -->
+    <div class="profile-hero">
+      <div class="avatar">👤</div>
+      <div class="hero-info">
+        <div class="hero-name" id="hero-name">CodeLearner</div>
+        <div class="hero-role" id="hero-role">// Beginner</div>
+        <div class="hero-xp-wrap">
+          <div class="hero-xp-meta">
+            <span id="hero-level-label">Level 1</span>
+            <span id="hero-xp-label">0 / 200 XP</span>
+          </div>
+          <div class="hero-xp-track">
+            <div class="hero-xp-fill" id="hero-xp-fill" style="width:0%"></div>
+          </div>
+        </div>
+      </div>
+      <div class="hero-stats">
+        <div class="hstat">
+          <span class="hstat-val" id="stat-completed">0</span>
+          <div class="hstat-lbl">Completed</div>
+        </div>
+        <div class="hstat">
+          <span class="hstat-val gold" id="stat-achievements">0</span>
+          <div class="hstat-lbl">Achievements</div>
+        </div>
+        <div class="hstat">
+          <span class="hstat-val green" id="stat-xp">0</span>
+          <div class="hstat-lbl">Total XP</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CHALLENGE PROGRESS -->
+    <div class="section-head">
+      <span class="section-head-label">Challenge Progress</span>
+    </div>
+    <div class="challenge-progress-grid" id="challenge-progress-grid"></div>
+
+    <!-- ACHIEVEMENTS -->
+    <div class="section-head" style="margin-top:2.5rem;">
+      <span class="section-head-label">Achievements</span>
+      <span class="section-count" id="ach-count">0 / 0 Unlocked</span>
+    </div>
+
+    <div class="filter-row">
+      <button class="filter-btn active" onclick="setFilter('all',this)">All</button>
+      <button class="filter-btn" onclick="setFilter('unlocked',this)">Unlocked</button>
+      <button class="filter-btn" onclick="setFilter('locked',this)">Locked</button>
+      <button class="filter-btn" onclick="setFilter('challenge',this)">Challenge</button>
+      <button class="filter-btn" onclick="setFilter('mastery',this)">Mastery</button>
+      <button class="filter-btn" onclick="setFilter('streak',this)">Streak</button>
+      <button class="filter-btn" onclick="setFilter('category',this)">Category</button>
+    </div>
+
+    <div class="ach-grid" id="ach-grid"></div>
+
+  </div>
+
+  <!-- MODAL -->
+  <div class="modal-backdrop" id="modalBackdrop" onclick="closeModal(event)">
+    <div class="modal">
+      <button class="modal-close" onclick="closeModalDirect()">✕</button>
+      <div id="modal-body"></div>
+    </div>
+  </div>
+
+  <script>
+    // ─── AUTH: redirect to login if no user ───
+    const CURRENT_USER = localStorage.getItem('cj_current_user');
+    if (!CURRENT_USER) { window.location.href = 'login.html'; }
+    function progressKey() { return 'cj_progress_' + CURRENT_USER; }
+
+    // ─── SHARED STATE (read from localStorage, written by challenges.html) ───
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(progressKey());
+        return raw ? JSON.parse(raw) : defaultState();
+      } catch(e) { return defaultState(); }
+    }
+
+    function defaultState() {
+      return {
+        levelStars: {},      // { "1": 3, "2": 2, ... }  — star counts per challenge level
+        bestStreak: 0,       // highest streak ever achieved
+        perfectLevels: [],   // challenge levels where 4/4 was scored
+        totalXP: 0
+      };
+    }
+
+    // ─── CHALLENGE LEVEL META (matches challenges.html) ───
+    const CHALLENGE_META = [
+      { id:1, title:'HTML: Basics',          lang:'HTML' },
+      { id:2, title:'CSS: Style a Button',   lang:'CSS'  },
+      { id:3, title:'JS: Variables & Types', lang:'JS'   },
+      { id:4, title:'HTML: Links & Images',  lang:'HTML' },
+      { id:5, title:'CSS: Flexbox Layout',   lang:'CSS'  },
+      { id:6, title:'JS: Functions',         lang:'JS'   },
+      { id:7, title:'CSS: Grid Layout',      lang:'CSS'  },
+      { id:8, title:'JS: DOM & Events',      lang:'JS'   },
+    ];
+
+    // ─── ACHIEVEMENT DEFINITIONS ───
+    // condition(state): returns true if unlocked
+    const ACHIEVEMENTS = [
+      // ── Complete each challenge level ──
+      { id:'ch1',  icon:'🌐', name:'First Steps',       desc:'Complete Challenge Level 1: HTML Basics.',                        tag:'challenge', tagLabel:'Challenge',
+        condition: s => !!s.levelStars['1'],    req: 'Complete Challenge Level 1 — HTML: Basics.' },
+      { id:'ch2',  icon:'🎨', name:'Style Master',      desc:'Complete Challenge Level 2: CSS Style a Button.',                 tag:'challenge', tagLabel:'Challenge',
+        condition: s => !!s.levelStars['2'],    req: 'Complete Challenge Level 2 — CSS: Style a Button.' },
+      { id:'ch3',  icon:'📦', name:'Variable Wizard',   desc:'Complete Challenge Level 3: JS Variables & Types.',               tag:'challenge', tagLabel:'Challenge',
+        condition: s => !!s.levelStars['3'],    req: 'Complete Challenge Level 3 — JS: Variables & Types.' },
+      { id:'ch4',  icon:'🔗', name:'Link Builder',      desc:'Complete Challenge Level 4: HTML Links & Images.',                tag:'challenge', tagLabel:'Challenge',
+        condition: s => !!s.levelStars['4'],    req: 'Complete Challenge Level 4 — HTML: Links & Images.' },
+      { id:'ch5',  icon:'📐', name:'Flex Hero',         desc:'Complete Challenge Level 5: CSS Flexbox Layout.',                 tag:'challenge', tagLabel:'Challenge',
+        condition: s => !!s.levelStars['5'],    req: 'Complete Challenge Level 5 — CSS: Flexbox Layout.' },
+      { id:'ch6',  icon:'🔧', name:'Function Forger',   desc:'Complete Challenge Level 6: JS Functions.',                       tag:'challenge', tagLabel:'Challenge',
+        condition: s => !!s.levelStars['6'],    req: 'Complete Challenge Level 6 — JS: Functions.' },
+      { id:'ch7',  icon:'🗂️', name:'Grid Architect',   desc:'Complete Challenge Level 7: CSS Grid Layout.',                    tag:'challenge', tagLabel:'Challenge',
+        condition: s => !!s.levelStars['7'],    req: 'Complete Challenge Level 7 — CSS: Grid Layout.' },
+      { id:'ch8',  icon:'🖱️', name:'DOM Commander',    desc:'Complete Challenge Level 8: JS DOM & Events.',                    tag:'challenge', tagLabel:'Challenge',
+        condition: s => !!s.levelStars['8'],    req: 'Complete Challenge Level 8 — JS: DOM & Events.' },
+
+      // ── Perfect score (4/4) ──
+      { id:'p1',   icon:'⭐', name:'Perfect HTML',      desc:'Score 4/4 on any HTML challenge level.',                          tag:'mastery',   tagLabel:'Mastery',
+        condition: s => s.perfectLevels.some(id => [1,4].includes(id)),
+        req: 'Get a perfect 4/4 score on Level 1 (HTML: Basics) or Level 4 (HTML: Links & Images).' },
+      { id:'p2',   icon:'🏅', name:'CSS Perfectionist', desc:'Score 4/4 on any CSS challenge level.',                           tag:'mastery',   tagLabel:'Mastery',
+        condition: s => s.perfectLevels.some(id => [2,5,7].includes(id)),
+        req: 'Get a perfect 4/4 score on Level 2, 5, or 7 (any CSS level).' },
+      { id:'p3',   icon:'💎', name:'JS Flawless',       desc:'Score 4/4 on any JavaScript challenge level.',                    tag:'mastery',   tagLabel:'Mastery',
+        condition: s => s.perfectLevels.some(id => [3,6,8].includes(id)),
+        req: 'Get a perfect 4/4 score on Level 3, 6, or 8 (any JS level).' },
+      { id:'p4',   icon:'🔱', name:'Triple Perfection',  desc:'Score 4/4 on three different challenge levels.',                 tag:'mastery',   tagLabel:'Mastery',
+        condition: s => s.perfectLevels.length >= 3,
+        req: 'Earn a perfect 4/4 score on 3 different challenge levels.' },
+
+      // ── Streaks ──
+      { id:'s1',   icon:'🔥', name:'On Fire',           desc:'Answer 3 questions correctly in a row.',                          tag:'streak',    tagLabel:'Streak',
+        condition: s => s.bestStreak >= 3,      req: 'Answer 3 questions in a row correctly within a challenge.' },
+      { id:'s2',   icon:'⚡', name:'Lightning Round',   desc:'Answer all 4 questions in a level correctly without a mistake.',  tag:'streak',    tagLabel:'Streak',
+        condition: s => s.bestStreak >= 4,      req: 'Get all 4 questions correct in a row (no skips or mistakes).' },
+      { id:'s3',   icon:'🌪️', name:'Unstoppable',       desc:'Maintain a streak of 8 correct answers across any session.',     tag:'streak',    tagLabel:'Streak',
+        condition: s => s.bestStreak >= 8,      req: 'Answer 8 questions in a row correctly (can span multiple levels).' },
+
+      // ── Category completion ──
+      { id:'cat1', icon:'🌍', name:'HTML Mastery',      desc:'Complete all 2 HTML challenge levels (1 & 4).',                   tag:'category',  tagLabel:'Category',
+        condition: s => [1,4].every(id => !!s.levelStars[String(id)]),
+        req: 'Complete both HTML challenge levels: Level 1 and Level 4.' },
+      { id:'cat2', icon:'🎭', name:'CSS Mastery',       desc:'Complete all 3 CSS challenge levels (2, 5 & 7).',                 tag:'category',  tagLabel:'Category',
+        condition: s => [2,5,7].every(id => !!s.levelStars[String(id)]),
+        req: 'Complete all 3 CSS challenge levels: Levels 2, 5, and 7.' },
+      { id:'cat3', icon:'⚙️', name:'JS Mastery',        desc:'Complete all 3 JavaScript challenge levels (3, 6 & 8).',          tag:'category',  tagLabel:'Category',
+        condition: s => [3,6,8].every(id => !!s.levelStars[String(id)]),
+        req: 'Complete all 3 JS challenge levels: Levels 3, 6, and 8.' },
+
+      // ── Master badge ──
+      { id:'master', icon:'🏆', name:'CodeQuest Master', desc:'Complete ALL 8 challenge levels. You are a true CodeJourney master!', tag:'master', tagLabel:'Master',
+        condition: s => Object.keys(s.levelStars).length >= 8,
+        req: 'Complete every single challenge level (1–8).' },
+    ];
+
+    // ─── XP & LEVEL THRESHOLDS ───
+    const LEVEL_THRESHOLDS = [0, 200, 450, 750, 1100, 1500, 2000, 2600, 3300, 4000];
+    const LEVEL_TITLES = ['Beginner','Apprentice','Coder','Developer','Engineer','Architect','Expert','Master','Legend','Grandmaster'];
+
+    function computeLevel(xp) {
+      let lvl = 1;
+      for (let i = 1; i < LEVEL_THRESHOLDS.length; i++) {
+        if (xp >= LEVEL_THRESHOLDS[i]) lvl = i + 1; else break;
+      }
+      return lvl;
+    }
+
+    // ─── RENDER CHALLENGE PROGRESS ───
+    function renderChallengeProgress(state) {
+      const grid = document.getElementById('challenge-progress-grid');
+      grid.innerHTML = '';
+      CHALLENGE_META.forEach(ch => {
+        const stars = state.levelStars[String(ch.id)];
+        const done  = stars !== undefined;
+        const starStr = done
+          ? '★'.repeat(stars) + '☆'.repeat(3 - stars)
+          : '☆☆☆';
+
+        const card = document.createElement('div');
+        card.className = 'cp-card' + (done ? ' done' : '');
+        card.innerHTML = `
+          <div class="cp-top">
+            <div class="cp-name">${ch.title}</div>
+            <div class="cp-stars" style="color:${done ? 'var(--gold)' : 'var(--muted)'}">${starStr}</div>
+          </div>
+          <div class="cp-bar-wrap">
+            <div class="cp-bar-fill" style="width:${done ? 100 : 0}%"></div>
+          </div>
+          <div class="cp-label">${done ? `Completed · ${stars}★` : 'Not started'}</div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    // ─── RENDER ACHIEVEMENTS ───
+    let currentFilter = 'all';
+    let currentState = defaultState();
+
+    function renderAchievements(state, filter) {
+      const grid = document.getElementById('ach-grid');
+      grid.innerHTML = '';
+
+      const unlocked = ACHIEVEMENTS.filter(a => a.condition(state));
+      const total    = ACHIEVEMENTS.length;
+      document.getElementById('ach-count').textContent = `${unlocked.length} / ${total} Unlocked`;
+
+      const filtered = ACHIEVEMENTS.filter(a => {
+        if (filter === 'all')      return true;
+        if (filter === 'unlocked') return a.condition(state);
+        if (filter === 'locked')   return !a.condition(state);
+        return a.tag === filter;
+      });
+
+      if (!filtered.length) {
+        grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1">
+          <span class="empty-icon">🔍</span>No achievements match this filter.
+        </div>`;
+        return;
+      }
+
+      filtered.forEach(a => {
+        const isUnlocked = a.condition(state);
+        const tagColors  = { challenge:'tag-challenge', mastery:'tag-mastery', streak:'tag-streak', category:'tag-category', master:'tag-master' };
+
+        const card = document.createElement('div');
+        card.className = 'ach-card ' + (isUnlocked ? 'unlocked' : 'locked');
+        if (!isUnlocked) card.onclick = () => openLockedModal(a);
+
+        card.innerHTML = `
+          <div class="ach-check">✓</div>
+          <div class="ach-lock-overlay">
+            <div class="ach-lock-circle">🔒</div>
+            <span class="ach-lock-text">Locked</span>
+            <span class="ach-lock-req">${a.req}</span>
+          </div>
+          <div class="ach-inner">
+            <div class="ach-icon-wrap">${a.icon}</div>
+            <div class="ach-info">
+              <div class="ach-name">${a.name}</div>
+              <div class="ach-desc">${a.desc}</div>
+              <div class="ach-meta">
+                <span class="ach-tag ${tagColors[a.tag]}">${a.tagLabel}</span>
+              </div>
+            </div>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    // ─── RENDER HERO STATS ───
+    function renderHero(state) {
+      const completed = Object.keys(state.levelStars).length;
+      const xp        = state.totalXP || 0;
+      const lvl       = computeLevel(xp);
+      const title     = LEVEL_TITLES[Math.min(lvl - 1, LEVEL_TITLES.length - 1)];
+      const xpFloor   = LEVEL_THRESHOLDS[Math.min(lvl - 1, LEVEL_THRESHOLDS.length - 1)];
+      const xpCeil    = LEVEL_THRESHOLDS[Math.min(lvl, LEVEL_THRESHOLDS.length - 1)] || xpFloor + 500;
+      const pct       = Math.min(((xp - xpFloor) / (xpCeil - xpFloor)) * 100, 100);
+
+      document.getElementById('hero-role').textContent        = `// ${title}`;
+      document.getElementById('hero-level-label').textContent = `Level ${lvl}`;
+      document.getElementById('hero-xp-label').textContent    = `${xp} / ${xpCeil} XP`;
+      document.getElementById('hero-xp-fill').style.width     = pct + '%';
+      document.getElementById('stat-completed').textContent   = completed;
+      document.getElementById('stat-xp').textContent          = xp;
+
+      const unlockedCount = ACHIEVEMENTS.filter(a => a.condition(state)).length;
+      document.getElementById('stat-achievements').textContent = unlockedCount;
+    }
+
+    // ─── MODAL (locked achievement) ───
+    function openLockedModal(a) {
+      document.getElementById('modal-body').innerHTML = `
+        <div class="modal-icon">🔒</div>
+        <div class="modal-name">${a.name}</div>
+        <div class="modal-desc">${a.desc}</div>
+        <div class="modal-req-banner">
+          <span class="req-icon">⛔</span>
+          <div class="modal-req-text">
+            <strong>How to unlock:</strong><br>${a.req}
+          </div>
+        </div>
+        <button class="modal-go-btn" onclick="window.location.href='challenges.html'">
+          → Go to Challenges
+        </button>
+      `;
+      document.getElementById('modalBackdrop').classList.add('open');
+    }
+
+    function closeModal(e) {
+      if (e.target === document.getElementById('modalBackdrop')) closeModalDirect();
+    }
+    function closeModalDirect() {
+      document.getElementById('modalBackdrop').classList.remove('open');
+    }
+
+    function setFilter(f, btn) {
+      currentFilter = f;
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderAchievements(currentState, f);
+    }
+
+    // ─── INIT ───
+    function init() {
+      currentState = loadState();
+      renderHero(currentState);
+      renderChallengeProgress(currentState);
+      renderAchievements(currentState, 'all');
+    }
+
+    function logOut() {
+      localStorage.removeItem('cj_current_user');
+      window.location.href = 'login.html';
+    }
+
+    // Show current user in navbar and hero
+    const _navUser = document.getElementById('nav-user');
+    if (_navUser && CURRENT_USER) _navUser.textContent = CURRENT_USER;
+    // Show email as hero name (just the part before @)
+    const _heroName = document.getElementById('hero-name');
+    if (_heroName && CURRENT_USER) _heroName.textContent = CURRENT_USER.split('@')[0];
+
+    // Re-check when tab gets focus (user may have just done challenges)
+    window.addEventListener('focus', init);
+    init();
+  </script>
+</body>
+</html>

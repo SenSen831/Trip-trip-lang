@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CodeJourney — Challenges</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:      #080c14;
+  --bg2:     #0b1018;
+  --panel:   #0e1520;
+  --panel2:  #111a2a;
+  --panel3:  #162033;
+  --border:  #1c2840;
+  --border2: #253250;
+  --accent:  #00d4ff;
+  --accent2: #0091b0;
+  --gold:    #f5c842;
+  --muted:   #3a4f6b;
+  --text:    #d8e6f5;
+  --text2:   #6b859e;
+  --green:   #00e676;
+  --red:     #ff1744;
+  --navbar-h: 48px;
+}
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html, body {
+  width:100%; height:100%; overflow:hidden;
+  background:var(--bg); font-family:'DM Sans', sans-serif; color:var(--text);
+}
+
+/* ─── ANIMATED BG ─── */
+.bg-canvas {
+  position:fixed; inset:0; z-index:0;
+  background:
+    radial-gradient(ellipse at 20% 10%, rgba(0,212,255,0.07) 0%, transparent 40%),
+    radial-gradient(ellipse at 80% 90%, rgba(0,145,176,0.05) 0%, transparent 40%),
+    var(--bg);
+}
+.bg-grid {
+  position:fixed; inset:0; z-index:0;
+  background-image:
+    linear-gradient(rgba(28,40,64,0.6) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(28,40,64,0.6) 1px, transparent 1px);
+  background-size: 50px 50px;
+}
+
+/* ─── TOP NAVBAR ─── */
+.top-navbar {
+  position: fixed; top: 0; left: 0; right: 0;
+  height: var(--navbar-h);
+  background: rgba(8, 12, 20, 0.95); backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; padding: 0 20px; gap: 20px; z-index: 300;
+}
+.nav-left .logo-text {
+  font-family: 'Space Mono', monospace; font-size: 0.9rem; font-weight: 700;
+  color: var(--accent); text-shadow: 0 0 14px rgba(0,212,255,0.4);
+  letter-spacing: 0.08em; white-space: nowrap;
+}
+.nav-menu { display: flex; list-style: none; gap: 2px; margin-left: 10px; }
+.nav-menu li a {
+  display: block; padding: 5px 12px; font-size: 0.78rem; font-weight: 600;
+  color: var(--text2); text-decoration: none; border-radius: 6px;
+  border: 1px solid transparent; transition: all 0.15s;
+  letter-spacing: 0.02em; white-space: nowrap; font-family: 'DM Sans', sans-serif;
+}
+.nav-menu li a:hover { color: var(--text); background: rgba(255,255,255,0.04); border-color: var(--border); }
+.nav-menu li a.active { color: var(--accent); background: rgba(0,212,255,0.07); border-color: rgba(0,212,255,0.2); }
+.nav-menu li a.btn-wiki { color: var(--gold); background: rgba(245,200,66,0.07); border-color: rgba(245,200,66,0.2); }
+.nav-menu li a.btn-wiki:hover { background: rgba(245,200,66,0.12); border-color: rgba(245,200,66,0.35); }
+.nav-right { margin-left: auto; }
+.nav-right .nav-profile {
+  display: flex; align-items: center; gap: 7px; padding: 5px 13px;
+  font-size: 0.78rem; font-weight: 600; color: var(--text); text-decoration: none;
+  background: var(--panel2); border: 1px solid var(--border2); border-radius: 7px;
+  transition: all 0.15s; white-space: nowrap; font-family: 'DM Sans', sans-serif;
+}
+.nav-right .nav-profile:hover { background: var(--panel3); border-color: rgba(0,212,255,0.3); color: var(--accent); }
+
+/* ─── CHALLENGE VIEW ─── */
+#challenge-view {
+  position:relative; z-index:1;
+  display:flex; flex-direction:column;
+  width:100%; height:100%; overflow:hidden;
+  padding-top: var(--navbar-h);
+}
+.ch-topbar {
+  display:flex; align-items:center; gap:14px;
+  padding:10px 20px; border-bottom:1px solid var(--border);
+  background:rgba(11,16,24,0.95); flex-shrink:0; backdrop-filter:blur(8px);
+}
+.back-btn {
+  display:flex; align-items:center; gap:6px; padding:6px 14px; border-radius:7px;
+  border:1px solid var(--border2); background:transparent;
+  color:var(--text2); font-size:0.8rem; font-weight:600;
+  font-family:'DM Sans',sans-serif; cursor:pointer; transition:all 0.15s; white-space:nowrap;
+}
+.back-btn:hover { color:var(--text); border-color:var(--accent); }
+.level-badge { font-family:'Space Mono', monospace; font-size:0.9rem; font-weight:700; color:#fff; white-space:nowrap; }
+.level-badge .lv-num { color:var(--accent); }
+.level-progress-wrap { flex:1; display:flex; align-items:center; gap:10px; min-width:0; }
+.level-prog-bar { flex:1; height:6px; background:var(--border); border-radius:4px; overflow:hidden; min-width:60px; }
+.level-prog-fill {
+  height:100%; border-radius:4px;
+  background:linear-gradient(90deg, var(--accent2), var(--accent));
+  transition:width 0.5s ease; box-shadow: 0 0 8px rgba(0,212,255,0.3);
+}
+.level-prog-label { font-size:0.72rem; color:var(--text2); white-space:nowrap; font-weight:600; font-family:'Space Mono',monospace; }
+.answer-note { font-size:0.75rem; color:var(--text2); margin-left:auto; font-style:italic; white-space:nowrap; }
+
+/* ─── 3 col body ─── */
+.ch-body { display:flex; flex:1; overflow:hidden; }
+
+/* ─── GUIDE ─── */
+.guide-col {
+  width:260px; flex-shrink:0;
+  background:var(--panel2); border-right:1px solid var(--border);
+  display:flex; flex-direction:column; overflow:hidden;
+}
+.col-header {
+  padding:11px 16px; border-bottom:1px solid var(--border);
+  display:flex; align-items:center; gap:8px;
+  font-size:0.65rem; font-weight:700; letter-spacing:0.12em;
+  text-transform:uppercase; color:var(--text2); flex-shrink:0; font-family:'Space Mono',monospace;
+}
+.col-header-dot { width:8px; height:8px; border-radius:2px; flex-shrink:0; }
+.guide-items { flex:1; overflow-y:auto; padding:12px; display:flex; flex-direction:column; gap:8px; }
+.guide-items::-webkit-scrollbar { width:3px; }
+.guide-items::-webkit-scrollbar-thumb { background:var(--border2); border-radius:2px; }
+.guide-item {
+  display:flex; gap:10px; padding:10px 12px;
+  background:var(--panel); border:1px solid var(--border);
+  border-radius:8px; animation:fadeUp 0.3s ease-out both; transition:border-color 0.2s;
+}
+.guide-item:hover { border-color:var(--border2); }
+.guide-num {
+  width:22px; height:22px; border-radius:6px; flex-shrink:0;
+  background:linear-gradient(135deg, var(--accent2), var(--accent));
+  display:flex; align-items:center; justify-content:center;
+  font-size:0.68rem; font-weight:700; color:var(--bg); font-family:'Space Mono',monospace;
+}
+.guide-text { font-size:0.78rem; color:var(--text2); line-height:1.55; }
+.guide-text b { color:var(--text); }
+.hint-card {
+  margin:0 12px 12px;
+  background:rgba(245,200,66,0.05); border:1px solid rgba(245,200,66,0.2);
+  border-radius:8px; padding:10px 12px; display:flex; gap:8px; flex-shrink:0;
+}
+.hint-icon { font-size:13px; flex-shrink:0; margin-top:1px; }
+.hint-text-wrap { font-size:0.75rem; color:rgba(245,200,66,0.8); line-height:1.5; }
+.hint-label { font-size:0.6rem; font-weight:700; color:var(--gold); letter-spacing:0.1em; text-transform:uppercase; margin-bottom:3px; font-family:'Space Mono',monospace; }
+
+/* ─── PROBLEM ─── */
+.problem-col { flex:1; border-right:1px solid var(--border); display:flex; flex-direction:column; overflow:hidden; min-width:0; }
+.problem-body { flex:1; padding:18px 20px; overflow-y:auto; }
+.problem-body::-webkit-scrollbar { width:3px; }
+.problem-body::-webkit-scrollbar-thumb { background:var(--border2); border-radius:2px; }
+.problem-q {
+  background:var(--panel2); border:1px solid var(--border); border-left:3px solid var(--accent);
+  border-radius:0 10px 10px 0; padding:14px 16px;
+  font-size:0.92rem; line-height:1.6; color:var(--text);
+  margin-bottom:16px; animation:fadeUp 0.3s ease-out;
+}
+.options { display:flex; flex-direction:column; gap:9px; }
+.option {
+  display:flex; align-items:center; gap:12px; padding:13px 16px; border-radius:10px;
+  background:var(--panel2); border:1px solid var(--border);
+  cursor:pointer; transition:all 0.18s; font-size:0.88rem;
+  animation:fadeUp 0.35s ease-out both;
+}
+.option:nth-child(1){animation-delay:0.05s}
+.option:nth-child(2){animation-delay:0.1s}
+.option:nth-child(3){animation-delay:0.15s}
+.option:nth-child(4){animation-delay:0.2s}
+.option:hover:not(.disabled) { background:rgba(0,212,255,0.06); border-color:rgba(0,212,255,0.3); transform:translateX(4px); }
+.option.selected { background:rgba(0,212,255,0.1); border-color:var(--accent); box-shadow:0 0 16px rgba(0,212,255,0.15); }
+.option.correct { background:rgba(0,230,118,0.1); border-color:var(--green); box-shadow:0 0 16px rgba(0,230,118,0.2); }
+.option.wrong { background:rgba(255,23,68,0.08); border-color:var(--red); }
+.option.disabled { cursor:not-allowed; }
+.opt-letter {
+  width:28px; height:28px; border-radius:7px; display:flex; align-items:center; justify-content:center;
+  font-size:0.72rem; font-weight:700; flex-shrink:0;
+  background:rgba(255,255,255,0.04); border:1px solid var(--border2);
+  color:var(--text2); font-family:'Space Mono',monospace; transition:all 0.18s;
+}
+.option.selected .opt-letter { background:var(--accent2); border-color:var(--accent); color:#fff; }
+.option.correct  .opt-letter { background:var(--green);   border-color:var(--green);  color:#fff; }
+.option.wrong    .opt-letter { background:var(--red);     border-color:var(--red);    color:#fff; }
+.opt-text { flex:1; color:var(--text); font-weight:500; }
+.action-row {
+  display:flex; gap:10px; padding:14px 20px;
+  border-top:1px solid var(--border); flex-shrink:0; background:var(--panel);
+}
+.btn-submit {
+  display:flex; align-items:center; gap:7px; padding:9px 22px; border-radius:9px;
+  border:none; cursor:pointer;
+  background:linear-gradient(135deg, var(--accent2), var(--accent));
+  color:var(--bg); font-size:0.82rem; font-weight:700;
+  font-family:'DM Sans',sans-serif; transition:all 0.15s; box-shadow:0 0 16px rgba(0,212,255,0.3);
+}
+.btn-submit:hover:not(:disabled) { transform:translateY(-1px); box-shadow:0 0 24px rgba(0,212,255,0.5); }
+.btn-submit:active:not(:disabled) { transform:scale(0.97); }
+.btn-submit:disabled { opacity:0.35; cursor:not-allowed; }
+.btn-skip {
+  padding:9px 18px; border-radius:9px; border:1px solid var(--border2); background:transparent;
+  color:var(--text2); font-size:0.82rem; font-weight:600; font-family:'DM Sans',sans-serif;
+  cursor:pointer; transition:all 0.15s;
+}
+.btn-skip:hover { color:var(--text); border-color:var(--text2); }
+.btn-next {
+  display:none; align-items:center; gap:7px; padding:9px 22px; border-radius:9px;
+  border:none; cursor:pointer;
+  background:linear-gradient(135deg, #00a854, var(--green));
+  color:#fff; font-size:0.82rem; font-weight:700;
+  font-family:'DM Sans',sans-serif; transition:all 0.15s; box-shadow:0 0 16px rgba(0,230,118,0.3);
+}
+.btn-next.show { display:flex; }
+.btn-next:hover { transform:translateY(-1px); }
+.feedback {
+  margin:14px 0 0; padding:10px 14px; border-radius:8px;
+  font-size:0.82rem; font-weight:600; display:none; animation:fadeUp 0.25s ease-out;
+}
+.feedback.correct { background:rgba(0,230,118,0.08); border:1px solid rgba(0,230,118,0.25); color:var(--green); display:block; }
+.feedback.wrong   { background:rgba(255,23,68,0.08);  border:1px solid rgba(255,23,68,0.2);  color:var(--red);   display:block; }
+
+/* ─── OUTPUT ─── */
+.output-col { width:290px; flex-shrink:0; display:flex; flex-direction:column; overflow:hidden; }
+.output-body { flex:1; padding:14px; overflow-y:auto; }
+.output-body::-webkit-scrollbar { width:3px; }
+.output-body::-webkit-scrollbar-thumb { background:var(--border2); border-radius:2px; }
+.output-terminal {
+  background:#050810; border:1px solid var(--border2); border-radius:8px; padding:14px;
+  font-family:'Space Mono', monospace; font-size:0.75rem; color:var(--text2);
+  line-height:1.7; min-height:110px; position:relative; overflow:hidden;
+}
+.output-terminal::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:2px;
+  background:linear-gradient(90deg, transparent, var(--accent), transparent); opacity:0.4;
+}
+.out-comment { color:var(--muted); }
+.out-success { color:var(--green); }
+.out-error   { color:var(--red); }
+.out-info    { color:var(--accent); }
+.score-panel {
+  margin-top:12px; background:var(--panel2); border:1px solid var(--border);
+  border-radius:10px; padding:12px; display:grid; grid-template-columns:1fr 1fr; gap:10px;
+}
+.score-item { text-align:center; }
+.score-val { font-family:'Space Mono',monospace; font-size:1.1rem; font-weight:700; color:#fff; }
+.score-lbl { font-size:0.58rem; color:var(--text2); font-weight:600; letter-spacing:0.08em; text-transform:uppercase; margin-top:2px; font-family:'Space Mono',monospace; }
+.xp-bar-wrap { margin-top:12px; }
+.xp-bar-label { display:flex; justify-content:space-between; font-size:0.62rem; color:var(--text2); margin-bottom:5px; font-weight:600; font-family:'Space Mono',monospace; }
+.xp-bar { height:6px; background:var(--border); border-radius:4px; overflow:hidden; }
+.xp-fill { height:100%; border-radius:4px; background:linear-gradient(90deg, var(--accent2), var(--accent)); box-shadow: 0 0 8px rgba(0,212,255,0.3); transition:width 0.6s ease; }
+.achievement {
+  margin-top:12px; background:rgba(245,200,66,0.05); border:1px solid rgba(245,200,66,0.2);
+  border-radius:10px; padding:12px; display:none; animation:fadeUp 0.4s ease-out;
+}
+.achievement.show { display:block; }
+.ach-title { font-size:0.6rem; color:var(--gold); font-weight:700; letter-spacing:0.1em; text-transform:uppercase; margin-bottom:5px; font-family:'Space Mono',monospace; }
+.ach-content { display:flex; align-items:center; gap:8px; }
+.ach-icon { font-size:1.3rem; }
+.ach-name { font-size:0.82rem; font-weight:700; color:var(--gold); }
+.ach-desc { font-size:0.68rem; color:rgba(245,200,66,0.6); }
+
+/* ─── UNLOCK TOAST ─── */
+.unlock-toast {
+  position:fixed; bottom:28px; right:26px; z-index:400;
+  background:var(--panel2); border:1px solid var(--accent); border-radius:10px; padding:11px 18px;
+  display:flex; align-items:center; gap:10px;
+  font-size:0.85rem; font-weight:600; color:var(--text);
+  box-shadow:0 0 24px rgba(0,212,255,0.3); animation:toastIn 0.4s ease-out; cursor:pointer;
+}
+@keyframes toastIn { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:none} }
+.toast-icon { font-size:1.1rem; }
+
+/* Achievement toast */
+.ach-toast {
+  position:fixed; bottom:90px; right:26px; z-index:400;
+  background:var(--panel2); border:1px solid rgba(245,200,66,0.4);
+  border-radius:10px; padding:11px 18px;
+  display:none; align-items:center; gap:10px;
+  font-size:0.82rem; font-weight:600; color:var(--gold);
+  box-shadow:0 0 24px rgba(245,200,66,0.2); cursor:pointer;
+  animation:toastIn 0.4s ease-out;
+}
+.ach-toast.show { display:flex; }
+
+/* ─── MAP VIEW ─── */
+#map-view {
+  position:relative; z-index:1; width:100%; height:100%;
+  overflow-y:auto; display:none; flex-direction:column; align-items:center;
+  scroll-behavior:smooth; padding-top: var(--navbar-h);
+}
+#map-view::-webkit-scrollbar { width:4px; }
+#map-view::-webkit-scrollbar-thumb { background:var(--border2); border-radius:2px; }
+.map-header { text-align:center; padding:36px 20px 10px; }
+.map-title { font-family:'Syne', sans-serif; font-size:1.5rem; font-weight:900; color:#fff; letter-spacing:0.06em; margin-bottom:6px; }
+.map-title em { font-style:normal; color:var(--accent); text-shadow:0 0 20px rgba(0,212,255,0.3); }
+.map-sub { font-size:0.85rem; color:var(--text2); }
+.global-progress { width:340px; margin:18px auto 0; background:var(--border); height:6px; border-radius:3px; overflow:hidden; }
+.global-progress-fill { height:100%; width:0%; background:linear-gradient(90deg, var(--accent2), var(--accent)); border-radius:3px; transition:width 0.8s ease; box-shadow: 0 0 8px rgba(0,212,255,0.3); }
+.global-progress-label { font-size:0.68rem; color:var(--text2); text-align:center; margin-top:5px; font-weight:600; font-family:'Space Mono',monospace; }
+.map-track { display:flex; flex-direction:column; align-items:center; padding:20px 0 60px; width:100%; max-width:280px; position:relative; }
+.connector { width:3px; height:52px; background:linear-gradient(180deg, var(--border2), transparent); margin:0 auto; border-radius:2px; }
+.connector.active { background:linear-gradient(180deg, var(--green), var(--accent)); box-shadow:0 0 8px rgba(0,212,255,0.3); animation:connPulse 2s infinite; }
+@keyframes connPulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+.level-node { display:flex; flex-direction:column; align-items:center; cursor:pointer; position:relative; animation:nodeIn 0.5s ease-out both; }
+@keyframes nodeIn { from{opacity:0;transform:scale(0.6)} to{opacity:1;transform:scale(1)} }
+.node-circle {
+  width:72px; height:72px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Space Mono', monospace; font-size:1.1rem; font-weight:700;
+  position:relative; transition:transform 0.2s; border:3px solid transparent;
+}
+.level-node:hover .node-circle { transform:scale(1.1); }
+.node-circle.done { background:radial-gradient(circle at 35% 35%, #00e676, #00a854); border-color:#00e676; box-shadow:0 0 24px rgba(0,230,118,0.5); color:#fff; font-size:1.6rem; }
+.node-circle.current { background:radial-gradient(circle at 35% 35%, var(--accent), var(--accent2)); border-color:var(--accent); box-shadow:0 0 28px rgba(0,212,255,0.6), 0 0 60px rgba(0,212,255,0.15); color:var(--bg); animation:currentPulse 2.2s infinite; }
+@keyframes currentPulse {
+  0%,100%{box-shadow:0 0 28px rgba(0,212,255,0.6),0 0 60px rgba(0,212,255,0.15)}
+  50%{box-shadow:0 0 40px rgba(0,212,255,0.9),0 0 80px rgba(0,212,255,0.3)}
+}
+.node-circle.locked { background:radial-gradient(circle at 35% 35%, var(--panel2), var(--panel)); border-color:var(--border2); color:var(--muted); font-size:1.4rem; }
+.play-arrow { position:absolute; top:-10px; left:50%; transform:translateX(-50%); width:0; height:0; border-left:8px solid transparent; border-right:8px solid transparent; border-bottom:13px solid var(--accent); filter:drop-shadow(0 0 6px var(--accent)); animation:bounce 1s infinite; }
+@keyframes bounce { 0%,100%{transform:translateX(-50%) translateY(0)} 50%{transform:translateX(-50%) translateY(-5px)} }
+.node-stars { display:flex; gap:3px; margin-top:7px; }
+.star { font-size:12px; }
+.star.lit  { color:var(--gold); filter:drop-shadow(0 0 4px rgba(245,200,66,0.6)); }
+.star.dim  { color:var(--muted); }
+.node-label { margin-top:6px; font-size:0.72rem; font-weight:600; text-align:center; color:var(--text2); line-height:1.3; max-width:110px; }
+.node-label.done-label    { color:var(--green); }
+.node-label.current-label { color:var(--accent); }
+.node-label.locked-label  { color:var(--muted); }
+
+@keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:none} }
+</style>
+</head>
+<body>
+
+<div class="bg-canvas"></div>
+<div class="bg-grid"></div>
+
+<!-- NAVBAR -->
+<nav class="top-navbar">
+  <div class="nav-left"><h2 class="logo-text">CodeJourney</h2></div>
+  <ul class="nav-menu">
+    <li><a href="community.html">Community</a></li>
+    <li><a href="wiki.html" class="btn-wiki">Wiki</a></li>
+    <li><a href="challenges.html" class="active">Challenges</a></li>
+    <li><a href="levels.html">Levels</a></li>
+  </ul>
+  <div class="nav-right" style="display:flex;align-items:center;gap:8px;">
+    <span id="nav-user" style="font-size:0.7rem;color:var(--text2);font-family:'Space Mono',monospace;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
+    <a href="profile.html" class="nav-profile">👤 Profile</a>
+    <button onclick="logOut()" style="padding:5px 12px;font-size:0.72rem;font-weight:700;font-family:'Space Mono',monospace;background:transparent;border:1px solid var(--border2);color:var(--text2);border-radius:7px;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.borderColor='var(--red)';this.style.color='var(--red)'" onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--text2)'">⏏ Logout</button>
+  </div>
+</nav>
+
+<!-- MAP VIEW -->
+<div id="map-view">
+  <div class="map-header">
+    <div class="map-title">CHALLENGE <em>MAP</em></div>
+    <div class="map-sub">Complete each level to unlock the next one</div>
+    <div class="global-progress">
+      <div class="global-progress-fill" id="global-prog-fill"></div>
+    </div>
+    <div class="global-progress-label" id="global-prog-label">0 / 8 Levels Complete</div>
+  </div>
+  <div class="map-track" id="map-track"></div>
+</div>
+
+<!-- UNLOCK TOAST -->
+<div class="unlock-toast" id="unlock-toast" style="display:none" onclick="this.style.display='none'">
+  <span class="toast-icon">🔓</span>
+  <span id="toast-text">Level unlocked!</span>
+</div>
+
+<!-- ACHIEVEMENT TOAST -->
+<div class="ach-toast" id="ach-toast" onclick="this.classList.remove('show')">
+  <span>🏆</span>
+  <span id="ach-toast-text">Achievement unlocked!</span>
+</div>
+
+<!-- CHALLENGE VIEW -->
+<div id="challenge-view">
+  <div class="ch-topbar">
+    <button class="back-btn" onclick="showMap()">← Back</button>
+    <div class="level-badge">
+      <span class="lv-num" id="ch-level-label">Level 1:</span>
+      &nbsp;<span id="ch-level-title">HTML Basics</span>
+    </div>
+    <div class="level-progress-wrap">
+      <div class="level-prog-bar">
+        <div class="level-prog-fill" id="level-prog-fill" style="width:0%"></div>
+      </div>
+      <div class="level-prog-label" id="level-prog-label">Q 1 / 4</div>
+    </div>
+    <div class="answer-note">Answer correctly to progress</div>
+  </div>
+
+  <div class="ch-body">
+    <!-- GUIDE -->
+    <div class="guide-col">
+      <div class="col-header">
+        <div class="col-header-dot" style="background:var(--accent)"></div>
+        GUIDE
+      </div>
+      <div class="guide-items" id="guide-items"></div>
+      <div class="hint-card">
+        <div class="hint-icon">💡</div>
+        <div class="hint-text-wrap">
+          <div class="hint-label">Hint</div>
+          <span id="hint-text"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- PROBLEM -->
+    <div class="problem-col">
+      <div class="col-header">
+        <div class="col-header-dot" style="background:var(--accent)"></div>
+        ? PROBLEM
+      </div>
+      <div class="problem-body">
+        <div class="problem-q" id="problem-q">Loading...</div>
+        <div class="options" id="options-wrap"></div>
+        <div class="feedback" id="feedback"></div>
+      </div>
+      <div class="action-row">
+        <button class="btn-submit" id="btn-submit" onclick="submitAnswer()" disabled>✓ Submit Answer</button>
+        <button class="btn-skip" onclick="skipQuestion()">Skip</button>
+        <button class="btn-next" id="btn-next" onclick="nextQuestion()">Next →</button>
+      </div>
+    </div>
+
+    <!-- OUTPUT -->
+    <div class="output-col">
+      <div class="col-header">
+        <div class="col-header-dot" style="background:var(--green)"></div>
+        OUTPUT
+      </div>
+      <div class="output-body">
+        <div class="output-terminal" id="output-terminal">
+          <span class="out-comment">// Output will appear here after submission</span>
+        </div>
+        <div class="score-panel">
+          <div class="score-item"><div class="score-val" id="score-correct">0</div><div class="score-lbl">Correct</div></div>
+          <div class="score-item"><div class="score-val" id="score-xp">+0</div><div class="score-lbl">XP Earned</div></div>
+          <div class="score-item"><div class="score-val" id="score-streak">🔥0</div><div class="score-lbl">Streak</div></div>
+          <div class="score-item"><div class="score-val" id="score-acc">100%</div><div class="score-lbl">Accuracy</div></div>
+        </div>
+        <div class="xp-bar-wrap">
+          <div class="xp-bar-label"><span>Level Progress</span><span id="xp-label">0 / 200 XP</span></div>
+          <div class="xp-bar"><div class="xp-fill" id="xp-fill" style="width:0%"></div></div>
+        </div>
+        <div class="achievement" id="achievement">
+          <div class="ach-title">🏆 Achievement Unlocked!</div>
+          <div class="ach-content">
+            <div class="ach-icon" id="ach-icon">⚡</div>
+            <div>
+              <div class="ach-name" id="ach-name-display">Speed Coder</div>
+              <div class="ach-desc" id="ach-desc-display">Answered 3 questions correctly in a row</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ─── CHALLENGE DATA ─── */
+const CHALLENGES = {
+  1: { title: 'HTML: Basics', guide: [
+    { text: 'HTML stands for <b>HyperText Markup Language</b> — the skeleton of every webpage.' },
+    { text: 'Tags like <b>&lt;h1&gt;</b>, <b>&lt;p&gt;</b>, and <b>&lt;div&gt;</b> structure your content.' },
+    { text: 'Every HTML document starts with <b>&lt;!DOCTYPE html&gt;</b> and has &lt;head&gt; and &lt;body&gt; sections.' },
+  ], questions: [
+    { q: 'Which HTML tag is used for the largest heading?', opts: ['<h6>', '<head>', '<h1>', '<title>'], correct: 2, hint: 'Headings go from h1 (biggest) to h6 (smallest) — think of h1 as the top of the hierarchy.' },
+    { q: 'What does HTML stand for?', opts: ['HyperText Markup Language', 'High Transfer Machine Learning', 'HyperType Meta Link', 'HyperText Machine Language'], correct: 0, hint: '"Markup" is the key word — HTML marks up content with tags to give it meaning.' },
+    { q: 'Which tag creates a paragraph?', opts: ['<para>', '<p>', '<pg>', '<text>'], correct: 1, hint: 'HTML loves short tag names — paragraph is just one letter: <p>.' },
+    { q: 'Where does the page title go?', opts: ['<body>', '<header>', '<head>', '<title> inside <head>'], correct: 3, hint: 'The <title> tag lives inside <head>, not <body> — it shows in the browser tab, not on the page.' },
+  ]},
+  2: { title: 'CSS: Style a Button', guide: [
+    { text: 'CSS selects elements with <b>selectors</b> and applies styles as property-value pairs.' },
+    { text: 'Use <b>background-color</b>, <b>color</b>, and <b>border-radius</b> to style buttons beautifully.' },
+    { text: 'The <b>:hover</b> pseudo-class lets you change styles when the user mouses over an element.' },
+  ], questions: [
+    { q: 'Which CSS property makes button corners round?', opts: ['corner-style', 'border-radius', 'round-corners', 'border-style'], correct: 1, hint: 'Think "radius" like the radius of a circle — border-radius curves the corners.' },
+    { q: 'How do you change text color in CSS?', opts: ['text-color', 'font-color', 'color', 'foreground'], correct: 2, hint: 'CSS keeps it simple — the property for text color is just: color.' },
+    { q: 'Which pseudo-class applies styles on mouse hover?', opts: [':active', ':focus', ':hover', ':click'], correct: 2, hint: 'Pseudo-classes describe a state — :hover fires when the mouse is over the element.' },
+    { q: 'What unit is "px" short for?', opts: ['Proportion', 'Pixel', 'Percent', 'Point-x'], correct: 1, hint: 'Screens are made of tiny dots — each dot is a pixel, and px measures in those dots.' },
+  ]},
+  3: { title: 'JS: Variables & Types', guide: [
+    { text: 'JavaScript has three ways to declare variables: <b>var</b>, <b>let</b>, and <b>const</b>.' },
+    { text: '<b>var</b> is old and has scope issues. Avoid it in modern code.' },
+    { text: 'Use <b>let</b> for values that change, and <b>const</b> for values that stay the same.' },
+  ], questions: [
+    { q: 'Which keyword should you use to declare a variable that will NOT be reassigned?', opts: ['var', 'let', 'const', 'fixed'], correct: 2, hint: '"const" is short for constant — once set, it cannot be changed.' },
+    { q: 'What is the type of the value: "Hello World"?', opts: ['Number', 'Boolean', 'String', 'Object'], correct: 2, hint: 'Any value wrapped in quotes — single or double — is a String in JavaScript.' },
+    { q: 'Which of these correctly declares a number variable?', opts: ['let age = "25"', 'let age = 25', 'num age = 25', 'int age = 25'], correct: 1, hint: 'In JS, no type keyword needed — just use let or const. Quotes make it a string, not a number.' },
+    { q: 'What will typeof true return?', opts: ['"number"', '"string"', '"bool"', '"boolean"'], correct: 3, hint: 'JavaScript\'s type for true/false is "boolean" — not "bool" like some other languages.' },
+  ]},
+  4: { title: 'HTML: Links & Images', guide: [
+    { text: 'HTML links are created using the <b>anchor tag</b>.' },
+    { text: 'The <b>href attribute</b> specifies the destination URL.' },
+    { text: 'Text between opening and closing tags becomes the <b>clickable link</b>.' },
+  ], questions: [
+    { q: 'Which HTML tag and attribute create a clickable link to another page?', opts: ['<link href="...">', '<a href="...">', '<url src="...">', '<nav to="...">'], correct: 1, hint: '"a" stands for anchor — pair it with href to point to any URL.' },
+    { q: 'Which tag is used to embed an image?', opts: ['<image>', '<picture>', '<img>', '<photo>'], correct: 2, hint: '<img> is a self-closing tag — it has no content between tags, just attributes like src.' },
+    { q: 'What does the "alt" attribute on an image provide?', opts: ['Image alignment', 'Alternative text description', 'Image altitude', 'Alt styling'], correct: 1, hint: 'alt = "alternative" — it shows text when the image fails to load and helps screen readers.' },
+    { q: 'How do you open a link in a new tab?', opts: ['target="_blank"', 'open="new"', 'href="_new"', 'target="tab"'], correct: 0, hint: 'Add target="_blank" to your <a> tag — "blank" means open in a new blank tab.' },
+  ]},
+  5: { title: 'CSS: Flexbox Layout', guide: [
+    { text: '<b>display: flex</b> activates flexbox on a container element.' },
+    { text: 'Use <b>justify-content</b> to align items on the main axis (horizontal).' },
+    { text: 'Use <b>align-items</b> to align items on the cross axis (vertical).' },
+  ], questions: [
+    { q: 'Which CSS property activates Flexbox on a container?', opts: ['layout: flex', 'display: flex', 'flex: true', 'mode: flex'], correct: 1, hint: 'Like Grid, Flexbox is activated via the display property — set it to "flex" on the parent.' },
+    { q: 'Which property centers flex items horizontally?', opts: ['align-items', 'text-align', 'justify-content', 'flex-align'], correct: 2, hint: 'justify-content controls the main (horizontal) axis — use "center" to center items.' },
+    { q: 'What value of flex-direction stacks items vertically?', opts: ['horizontal', 'column', 'vertical', 'stack'], correct: 1, hint: 'Think of a spreadsheet column — flex-direction: column stacks items top to bottom.' },
+    { q: 'Which property controls space between flex items?', opts: ['margin-flex', 'gap', 'spacing', 'padding-flex'], correct: 1, hint: 'gap is the modern, clean way to add space between flex (and grid) items — no margin hacks needed.' },
+  ]},
+  6: { title: 'JS: Functions', guide: [
+    { text: 'A <b>function</b> is a reusable block of code that performs a specific task.' },
+    { text: 'Use the <b>function</b> keyword, or write an <b>arrow function</b> with <b>=&gt;</b> for a shorter syntax.' },
+    { text: 'Functions can accept <b>parameters</b> as inputs and use <b>return</b> to send back a value.' },
+  ], questions: [
+    { q: 'Which of the following correctly defines a function in JavaScript?', opts: ['func greet() {}', 'function greet() {}', 'def greet() {}', 'greet = function[] {}'], correct: 1, hint: 'JavaScript uses the full word "function" — not func or def like other languages.' },
+    { q: 'What is the arrow function equivalent of: function add(a, b) { return a + b; }', opts: ['add = (a, b) => { a + b }', 'add = (a, b) -> a + b', 'const add = (a, b) => a + b', 'const add = [a, b] => a + b'], correct: 2, hint: 'Arrow functions with a single expression can omit the curly braces — the result is returned automatically.' },
+    { q: 'What does the return keyword do inside a function?', opts: ['Stops the script entirely', 'Outputs a value to the console', 'Sends a value back to the caller', 'Declares a new variable'], correct: 2, hint: 'return hands a value back to whoever called the function — different from console.log which just prints.' },
+    { q: 'What will this output? function square(n) { return n * n; } console.log(square(4));', opts: ['4', '8', '16', 'undefined'], correct: 2, hint: '4 * 4 = 16. The function multiplies n by itself, and console.log prints the returned value.' },
+  ]},
+  7: { title: 'CSS: Grid Layout', guide: [
+    { text: '<b>display: grid</b> turns a container into a CSS Grid, letting you define rows and columns.' },
+    { text: 'Use <b>grid-template-columns</b> to set the number and size of columns. The <b>fr</b> unit distributes available space.' },
+    { text: 'The <b>gap</b> property adds space between grid cells, and items can span multiple cells with <b>grid-column</b> / <b>grid-row</b>.' },
+  ], questions: [
+    { q: 'Which CSS property activates CSS Grid on a container?', opts: ['display: grid', 'layout: grid', 'grid: true', 'mode: grid'], correct: 0, hint: 'CSS Grid, like Flexbox, is enabled on the parent using display — set it to "grid".' },
+    { q: 'What does grid-template-columns: repeat(3, 1fr) create?', opts: ['3 rows of equal height', '3 columns of equal width', '1 column repeated 3 times in height', 'A 3×3 fixed grid'], correct: 1, hint: 'repeat(3, 1fr) is shorthand for 3 columns each taking 1 fraction of the available width.' },
+    { q: 'Which unit distributes remaining space proportionally in CSS Grid?', opts: ['px', '%', 'em', 'fr'], correct: 3, hint: '"fr" stands for fraction — 1fr means "give me one share of the leftover space".' },
+    { q: 'How do you make a grid item span 2 columns?', opts: ['column-span: 2', 'grid-column: span 2', 'col-merge: 2', 'flex-span: 2'], correct: 1, hint: 'Use grid-column: span 2 on the item itself — it tells the grid to stretch across 2 column tracks.' },
+  ]},
+  8: { title: 'JS: DOM & Events', guide: [
+    { text: 'The <b>DOM (Document Object Model)</b> is a tree-like representation of your HTML that JavaScript can read and modify.' },
+    { text: 'Use <b>document.getElementById()</b> or <b>document.querySelector()</b> to grab elements from the page.' },
+    { text: '<b>addEventListener()</b> listens for user actions like clicks, keypresses, and mouse movements, then runs a callback function.' },
+  ], questions: [
+    { q: 'Which method selects an HTML element by its id attribute?', opts: ['document.getElement("id")', 'document.selectById("id")', 'document.getElementById("id")', 'document.find("#id")'], correct: 2, hint: 'The method name says it all: get-Element-By-Id. Pass the id value without the # symbol.' },
+    { q: 'How do you change the text content of a DOM element stored in variable "el"?', opts: ['el.innerHTML = "text"', 'el.textContent = "text"', 'el.value = "text"', 'el.setText("text")'], correct: 1, hint: 'textContent sets plain text safely. innerHTML works too but can render HTML — use textContent for plain strings.' },
+    { q: 'Which method is used to attach a click listener to a button?', opts: ['button.onClick(fn)', 'button.listen("click", fn)', 'button.addEventListener("click", fn)', 'button.on("click", fn)'], correct: 2, hint: 'addEventListener takes two arguments: the event name as a string ("click"), and the function to run.' },
+    { q: 'What does document.querySelector(".box") select?', opts: ['All elements with class "box"', 'An element with id "box"', 'The first element with class "box"', 'A <box> HTML tag'], correct: 2, hint: 'querySelector returns only the FIRST match. Use querySelectorAll to get every matching element.' },
+  ]},
+};
+
+const LEVEL_META = [
+  { title: 'HTML: Basics',          lang: 'html' },
+  { title: 'CSS: Style a Button',   lang: 'css'  },
+  { title: 'JS: Variables & Types', lang: 'js'   },
+  { title: 'HTML: Links & Images',  lang: 'html' },
+  { title: 'CSS: Flexbox Layout',   lang: 'css'  },
+  { title: 'JS: Functions',         lang: 'js'   },
+  { title: 'CSS: Grid Layout',      lang: 'css'  },
+  { title: 'JS: DOM & Events',      lang: 'js'   },
+];
+const TOTAL_LEVELS = 8;
+
+/* ─── PROGRESS STATE (localStorage) ─── */
+/* AUTH: redirect to login if no user */
+const CURRENT_USER = localStorage.getItem('cj_current_user');
+if (!CURRENT_USER) { window.location.href = 'login.html'; }
+function progressKey() { return 'cj_progress_' + CURRENT_USER; }
+
+function loadProgress() {
+  try {
+    const raw = localStorage.getItem(progressKey());
+    return raw ? JSON.parse(raw) : freshProgress();
+  } catch(e) { return freshProgress(); }
+}
+function freshProgress() {
+  return { levelStars: {}, bestStreak: 0, perfectLevels: [], totalXP: 0 };
+}
+function saveProgress(p) {
+  try { localStorage.setItem(progressKey(), JSON.stringify(p)); } catch(e) {}
+}
+
+let progress = loadProgress();
+
+/* ─── ACHIEVEMENT CHECK ─── */
+// Returns list of newly unlocked achievement names after updating state
+const ACHIEVEMENT_CONDITIONS = [
+  { id:'ch1',  name:'First Steps',        icon:'🌐', check: p => !!p.levelStars['1'] },
+  { id:'ch2',  name:'Style Master',       icon:'🎨', check: p => !!p.levelStars['2'] },
+  { id:'ch3',  name:'Variable Wizard',    icon:'📦', check: p => !!p.levelStars['3'] },
+  { id:'ch4',  name:'Link Builder',       icon:'🔗', check: p => !!p.levelStars['4'] },
+  { id:'ch5',  name:'Flex Hero',          icon:'📐', check: p => !!p.levelStars['5'] },
+  { id:'ch6',  name:'Function Forger',    icon:'🔧', check: p => !!p.levelStars['6'] },
+  { id:'ch7',  name:'Grid Architect',     icon:'🗂️', check: p => !!p.levelStars['7'] },
+  { id:'ch8',  name:'DOM Commander',      icon:'🖱️', check: p => !!p.levelStars['8'] },
+  { id:'p1',   name:'Perfect HTML',       icon:'⭐', check: p => p.perfectLevels.some(id => [1,4].includes(id)) },
+  { id:'p2',   name:'CSS Perfectionist',  icon:'🏅', check: p => p.perfectLevels.some(id => [2,5,7].includes(id)) },
+  { id:'p3',   name:'JS Flawless',        icon:'💎', check: p => p.perfectLevels.some(id => [3,6,8].includes(id)) },
+  { id:'p4',   name:'Triple Perfection',  icon:'🔱', check: p => p.perfectLevels.length >= 3 },
+  { id:'s1',   name:'On Fire',            icon:'🔥', check: p => p.bestStreak >= 3 },
+  { id:'s2',   name:'Lightning Round',    icon:'⚡', check: p => p.bestStreak >= 4 },
+  { id:'s3',   name:'Unstoppable',        icon:'🌪️', check: p => p.bestStreak >= 8 },
+  { id:'cat1', name:'HTML Mastery',       icon:'🌍', check: p => [1,4].every(id => !!p.levelStars[String(id)]) },
+  { id:'cat2', name:'CSS Mastery',        icon:'🎭', check: p => [2,5,7].every(id => !!p.levelStars[String(id)]) },
+  { id:'cat3', name:'JS Mastery',         icon:'⚙️', check: p => [3,6,8].every(id => !!p.levelStars[String(id)]) },
+  { id:'master', name:'CodeQuest Master', icon:'🏆', check: p => Object.keys(p.levelStars).length >= 8 },
+];
+
+function checkNewAchievements(oldProgress, newProgress) {
+  const newlyUnlocked = [];
+  ACHIEVEMENT_CONDITIONS.forEach(a => {
+    const wasBefore = a.check(oldProgress);
+    const isNow     = a.check(newProgress);
+    if (!wasBefore && isNow) newlyUnlocked.push(a);
+  });
+  return newlyUnlocked;
+}
+
+function showAchievementToast(ach) {
+  const t = document.getElementById('ach-toast');
+  document.getElementById('ach-toast-text').textContent = `${ach.icon} Achievement Unlocked: ${ach.name}`;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 4000);
+}
+
+/* ─── SESSION STATE ─── */
+let unlockedUpTo = 1;
+let levelStarsLocal = {};
+let currentLevel = 1;
+let currentQ = 0;
+let selectedOpt = null;
+let answered = false;
+let correctCount = 0;
+let totalAnswered = 0;
+let xp = 0;
+let streak = 0;
+let sessionStreak = 0; // running streak for this session
+
+function syncFromProgress() {
+  levelStarsLocal = { ...progress.levelStars };
+  const completedLevels = Object.keys(levelStarsLocal).map(Number);
+  if (completedLevels.length === 0) {
+    // Nothing completed yet — only Level 1 is playable
+    unlockedUpTo = 1;
+  } else {
+    // Unlock one beyond the highest completed level
+    unlockedUpTo = Math.min(Math.max(...completedLevels) + 1, TOTAL_LEVELS);
+  }
+}
+
+function renderMap() {
+  syncFromProgress();
+  const track = document.getElementById('map-track');
+  track.innerHTML = '';
+  const done = Object.keys(levelStarsLocal).length;
+  document.getElementById('global-prog-label').textContent = `${done} / ${TOTAL_LEVELS} Levels Complete`;
+  document.getElementById('global-prog-fill').style.width = ((done / TOTAL_LEVELS) * 100) + '%';
+
+  for (let lvl = 1; lvl <= TOTAL_LEVELS; lvl++) {
+    const stars   = levelStarsLocal[lvl] ?? -1;
+    const isDone    = stars >= 0;
+    const isCurrent = !isDone && lvl === unlockedUpTo;
+    const isLocked  = lvl > unlockedUpTo;
+
+    if (lvl > 1) {
+      const conn = document.createElement('div');
+      conn.className = 'connector' + (levelStarsLocal[lvl - 1] >= 0 ? ' active' : '');
+      track.appendChild(conn);
+    }
+
+    const node = document.createElement('div');
+    node.className = 'level-node';
+    node.style.animationDelay = ((lvl - 1) * 0.05) + 's';
+    if (!isLocked) node.onclick = () => openChallenge(lvl);
+
+    if (isCurrent) {
+      const arrow = document.createElement('div');
+      arrow.className = 'play-arrow';
+      node.appendChild(arrow);
+    }
+
+    const circle = document.createElement('div');
+    circle.className = 'node-circle ' + (isDone ? 'done' : isCurrent ? 'current' : 'locked');
+    circle.textContent = isDone ? '✓' : isCurrent ? lvl : '🔒';
+    node.appendChild(circle);
+
+    const starsEl = document.createElement('div');
+    starsEl.className = 'node-stars';
+    const earnedStars = isDone ? stars : 0;
+    for (let s = 0; s < 3; s++) {
+      const star = document.createElement('span');
+      star.className = 'star ' + (s < earnedStars ? 'lit' : 'dim');
+      star.textContent = '★';
+      starsEl.appendChild(star);
+    }
+    node.appendChild(starsEl);
+
+    const label = document.createElement('div');
+    label.className = 'node-label ' + (isDone ? 'done-label' : isCurrent ? 'current-label' : 'locked-label');
+    label.textContent = LEVEL_META[lvl - 1].title;
+    node.appendChild(label);
+
+    track.appendChild(node);
+  }
+}
+
+function showMap() {
+  renderMap();
+  document.getElementById('map-view').style.display = 'flex';
+  document.getElementById('challenge-view').style.display = 'none';
+}
+
+function openChallenge(lvl) {
+  syncFromProgress();
+  if (lvl > unlockedUpTo) return;
+  currentLevel = lvl;
+  currentQ = 0;
+  selectedOpt = null;
+  answered = false;
+  sessionStreak = 0;
+
+  document.getElementById('map-view').style.display = 'none';
+  document.getElementById('challenge-view').style.display = 'flex';
+
+  const data = CHALLENGES[lvl];
+  document.getElementById('ch-level-label').textContent = 'Level ' + lvl + ':';
+  document.getElementById('ch-level-title').textContent = data ? data.title : LEVEL_META[lvl-1].title;
+
+  resetScores();
+  loadQuestion();
+}
+
+function loadQuestion() {
+  const data = CHALLENGES[currentLevel];
+  if (!data) return;
+
+  const gi = document.getElementById('guide-items');
+  gi.innerHTML = '';
+  data.guide.forEach((g, i) => {
+    gi.innerHTML += `<div class="guide-item" style="animation-delay:${i*0.07}s">
+      <div class="guide-num">${i+1}</div>
+      <div class="guide-text">${g.text}</div>
+    </div>`;
+  });
+
+  const total = data.questions.length;
+  document.getElementById('level-prog-fill').style.width = ((currentQ / total) * 100) + '%';
+  document.getElementById('level-prog-label').textContent = `Q ${currentQ + 1} / ${total}`;
+
+  const q = data.questions[currentQ];
+  document.getElementById('hint-text').textContent = q.hint || '';
+  document.getElementById('problem-q').textContent = q.q;
+
+  const ow = document.getElementById('options-wrap');
+  ow.innerHTML = '';
+  ['A','B','C','D'].forEach((letter, i) => {
+    const div = document.createElement('div');
+    div.className = 'option';
+    div.id = 'opt-' + i;
+    div.onclick = () => selectOption(i);
+    div.innerHTML = `<div class="opt-letter">${letter}</div>`;
+    const span = document.createElement('div');
+    span.className = 'opt-text';
+    span.textContent = q.opts[i];
+    div.appendChild(span);
+    ow.appendChild(div);
+  });
+
+  document.getElementById('feedback').className = 'feedback';
+  document.getElementById('feedback').textContent = '';
+  document.getElementById('btn-submit').disabled = true;
+  document.getElementById('btn-submit').style.display = 'flex';
+  document.getElementById('btn-next').classList.remove('show');
+  document.getElementById('output-terminal').innerHTML =
+    '<span class="out-comment">// Output will appear here after submission</span>';
+  answered = false;
+  selectedOpt = null;
+}
+
+function selectOption(i) {
+  if (answered) return;
+  document.querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
+  document.getElementById('opt-' + i).classList.add('selected');
+  selectedOpt = i;
+  document.getElementById('btn-submit').disabled = false;
+}
+
+function submitAnswer() {
+  if (selectedOpt === null || answered) return;
+  answered = true;
+  totalAnswered++;
+
+  const data = CHALLENGES[currentLevel];
+  const q = data.questions[currentQ];
+  const correct = q.correct;
+  const isCorrect = selectedOpt === correct;
+
+  document.querySelectorAll('.option').forEach(o => o.classList.add('disabled'));
+  document.getElementById('opt-' + correct).classList.add('correct');
+  if (!isCorrect) document.getElementById('opt-' + selectedOpt).classList.add('wrong');
+
+  const fb = document.getElementById('feedback');
+  if (isCorrect) {
+    fb.textContent = '✓ Correct! ' + (currentQ < data.questions.length - 1 ? 'Keep going!' : 'Level complete! 🎉');
+    fb.className = 'feedback correct';
+    correctCount++; streak++; xp += 50;
+    sessionStreak++;
+  } else {
+    fb.textContent = `✗ Not quite! The correct answer was: "${q.opts[correct]}"`;
+    fb.className = 'feedback wrong';
+    streak = 0; sessionStreak = 0;
+  }
+
+  // Update best streak in progress right away
+  if (sessionStreak > (progress.bestStreak || 0)) {
+    progress.bestStreak = sessionStreak;
+  }
+
+  const term = document.getElementById('output-terminal');
+  term.innerHTML = isCorrect
+    ? `<span class="out-comment">// Running answer check...</span>\n<span class="out-success">✓ PASS — Answer validated</span>\n<span class="out-info">// XP +50 awarded</span>\n<span class="out-info">// Streak: ${sessionStreak} 🔥</span>`
+    : `<span class="out-comment">// Running answer check...</span>\n<span class="out-error">✗ FAIL — Incorrect answer</span>\n<span class="out-comment">// Tip: ${q.hint || ''}</span>`;
+
+  updateStats();
+
+  const isLast = currentQ === data.questions.length - 1;
+  document.getElementById('btn-submit').style.display = 'none';
+  const nextBtn = document.getElementById('btn-next');
+  nextBtn.textContent = isLast ? '🏆 Finish Level' : 'Next →';
+  nextBtn.classList.add('show');
+}
+
+function nextQuestion() {
+  currentQ++;
+  document.getElementById('btn-submit').style.display = 'flex';
+  document.getElementById('btn-submit').disabled = true;
+  if (currentQ >= CHALLENGES[currentLevel].questions.length) { finishLevel(); return; }
+  loadQuestion();
+}
+
+function skipQuestion() {
+  if (answered) return;
+  totalAnswered++; streak = 0; sessionStreak = 0;
+  document.getElementById('feedback').textContent = '⏭ Skipped. Keep practising!';
+  document.getElementById('feedback').className = 'feedback wrong';
+  answered = true;
+  currentQ++;
+  if (currentQ >= CHALLENGES[currentLevel].questions.length) { finishLevel(); return; }
+  setTimeout(loadQuestion, 800);
+}
+
+function finishLevel() {
+  const total = CHALLENGES[currentLevel].questions.length;
+  const acc = totalAnswered ? Math.round((correctCount / totalAnswered) * 100) : 0;
+
+  let earned = 0;
+  if (correctCount === total)  earned = 3;
+  else if (correctCount === 3) earned = 2;
+  else if (correctCount >= 1)  earned = 1;
+
+  const starStr = '★'.repeat(earned) + '☆'.repeat(3 - earned);
+  const canUnlock = earned >= 1;
+
+  document.getElementById('output-terminal').innerHTML =
+    `<span class="out-success">🏆 LEVEL ${canUnlock ? 'COMPLETE' : 'FAILED'}!</span>\n` +
+    `<span class="out-info">// Score: ${correctCount}/${total}</span>\n` +
+    `<span class="out-info">// Accuracy: ${acc}%</span>\n` +
+    `<span class="out-info">// Stars earned: ${starStr}</span>\n` +
+    `<span class="out-info">// Total XP: +${correctCount * 50}</span>` +
+    (!canUnlock ? `\n<span class="out-error">// Get at least 1 correct to unlock next stage!</span>` : '');
+
+  document.getElementById('btn-next').classList.remove('show');
+  document.getElementById('btn-submit').style.display = 'none';
+  updateStats();
+
+  // ── SAVE PROGRESS ──
+  if (canUnlock) {
+    const oldProgress = JSON.parse(JSON.stringify(progress)); // deep copy for comparison
+
+    // Best star score if replaying
+    const prev = progress.levelStars[String(currentLevel)] ?? -1;
+    if (earned > prev) progress.levelStars[String(currentLevel)] = earned;
+
+    // Perfect score tracking
+    if (correctCount === total && !progress.perfectLevels.includes(currentLevel)) {
+      progress.perfectLevels.push(currentLevel);
+    }
+
+    // Total XP
+    progress.totalXP = (progress.totalXP || 0) + (correctCount * 50);
+
+    // Best streak
+    if (sessionStreak > (progress.bestStreak || 0)) {
+      progress.bestStreak = sessionStreak;
+    }
+
+    saveProgress(progress);
+
+    // Check for newly unlocked achievements
+    const newAch = checkNewAchievements(oldProgress, progress);
+    if (newAch.length > 0) {
+      // Show achievement panel in output col
+      document.getElementById('achievement').classList.add('show');
+      document.getElementById('ach-icon').textContent = newAch[0].icon;
+      document.getElementById('ach-name-display').textContent = newAch[0].name;
+      document.getElementById('ach-desc-display').textContent = `Achievement unlocked on Challenges!`;
+      // Show toast for first one
+      setTimeout(() => showAchievementToast(newAch[0]), 1500);
+    }
+  }
+
+  // Unlock next level
+  if (canUnlock && currentLevel < TOTAL_LEVELS) {
+    syncFromProgress();
+  }
+
+  setTimeout(() => {
+    showMap();
+    const t = document.getElementById('unlock-toast');
+    if (!canUnlock) {
+      document.getElementById('toast-text').textContent = `0 correct — get at least 1 right to unlock the next stage! 🔒`;
+      t.style.borderColor = 'var(--red)'; t.style.boxShadow = '0 0 24px rgba(255,23,68,0.3)';
+    } else if (currentLevel >= TOTAL_LEVELS) {
+      document.getElementById('toast-text').textContent = `All levels complete! You're a CodeQuest master! 🏆`;
+      t.style.borderColor = 'var(--accent)'; t.style.boxShadow = '0 0 24px rgba(0,212,255,0.3)';
+    } else {
+      document.getElementById('toast-text').textContent =
+        `Level ${currentLevel} complete! ${starStr} — Level ${currentLevel + 1} unlocked 🔓`;
+      t.style.borderColor = 'var(--accent)'; t.style.boxShadow = '0 0 24px rgba(0,212,255,0.3)';
+    }
+    t.style.display = 'flex';
+    setTimeout(() => { t.style.display = 'none'; }, 5000);
+  }, 2800);
+}
+
+function updateStats() {
+  const acc = totalAnswered ? Math.round((correctCount / totalAnswered) * 100) : 100;
+  document.getElementById('score-correct').textContent = correctCount;
+  document.getElementById('score-xp').textContent = '+' + (correctCount * 50);
+  document.getElementById('score-streak').textContent = '🔥' + sessionStreak;
+  document.getElementById('score-acc').textContent = acc + '%';
+  const maxXP = (CHALLENGES[currentLevel]?.questions?.length || 4) * 50;
+  document.getElementById('xp-fill').style.width = maxXP ? Math.min((xp / maxXP) * 100, 100) + '%' : '0%';
+  document.getElementById('xp-label').textContent = xp + ' / ' + maxXP + ' XP';
+}
+
+function resetScores() {
+  correctCount = 0; totalAnswered = 0; streak = 0; xp = 0; sessionStreak = 0;
+  document.getElementById('achievement').classList.remove('show');
+  updateStats();
+}
+
+// Show current user in navbar
+const _navUser = document.getElementById('nav-user');
+if (_navUser && CURRENT_USER) _navUser.textContent = CURRENT_USER;
+
+function logOut() {
+  localStorage.removeItem('cj_current_user');
+  window.location.href = 'login.html';
+}
+
+showMap();
+</script>
+</body>
+</html>

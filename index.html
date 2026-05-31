@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login – CodeJourney</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:      #080c14;
+      --panel:   #0e1520;
+      --panel2:  #111a2a;
+      --panel3:  #162033;
+      --border:  #1c2840;
+      --border2: #253250;
+      --accent:  #00d4ff;
+      --accent2: #0091b0;
+      --gold:    #f5c842;
+      --muted:   #3a4f6b;
+      --text:    #d8e6f5;
+      --text2:   #6b859e;
+      --red:     #ff1744;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg); min-height: 100vh;
+      font-family: 'DM Sans', sans-serif; color: var(--text);
+      display: flex; align-items: center; justify-content: center;
+      padding: 1.5rem;
+    }
+
+    /* background grid */
+    .bg-grid {
+      position: fixed; inset: 0; z-index: 0;
+      background-image:
+        linear-gradient(rgba(28,40,64,0.5) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(28,40,64,0.5) 1px, transparent 1px);
+      background-size: 50px 50px;
+    }
+    .bg-glow {
+      position: fixed; inset: 0; z-index: 0;
+      background:
+        radial-gradient(ellipse at 30% 20%, rgba(0,212,255,0.08) 0%, transparent 50%),
+        radial-gradient(ellipse at 70% 80%, rgba(0,145,176,0.06) 0%, transparent 50%);
+    }
+
+    /* card */
+    .login-card {
+      position: relative; z-index: 1;
+      background: var(--panel); border: 1px solid var(--border2);
+      border-radius: 20px; padding: 2.5rem 2rem;
+      width: 100%; max-width: 400px;
+      box-shadow: 0 0 60px rgba(0,0,0,0.4), 0 0 0 1px rgba(0,212,255,0.05);
+      animation: cardIn 0.5s ease-out;
+    }
+    @keyframes cardIn { from { opacity:0; transform: translateY(20px); } to { opacity:1; transform: none; } }
+
+    .card-top-bar {
+      height: 3px; border-radius: 99px;
+      background: linear-gradient(90deg, var(--accent2), var(--accent), var(--gold));
+      margin-bottom: 2rem; box-shadow: 0 0 12px rgba(0,212,255,0.3);
+    }
+
+    .logo {
+      font-family: 'Space Mono', monospace; font-size: 1rem; font-weight: 700;
+      color: var(--accent); letter-spacing: 0.08em;
+      text-shadow: 0 0 14px rgba(0,212,255,0.4);
+      margin-bottom: 1.8rem; display: block;
+    }
+
+    .login-title {
+      font-family: 'Syne', sans-serif; font-size: 1.7rem; font-weight: 800;
+      color: var(--text); line-height: 1.1; margin-bottom: 0.5rem;
+    }
+    .login-title em { font-style: normal; color: var(--accent); }
+
+    .login-sub {
+      font-size: 0.82rem; color: var(--text2); line-height: 1.6; margin-bottom: 2rem;
+    }
+
+    /* input group */
+    .input-group { margin-bottom: 1rem; }
+    .input-label {
+      display: block; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--text2); margin-bottom: 7px;
+      font-family: 'Space Mono', monospace;
+    }
+    .input-wrap { position: relative; }
+    .input-icon {
+      position: absolute; left: 13px; top: 50%; transform: translateY(-50%);
+      font-size: 15px; pointer-events: none;
+    }
+    .gmail-input {
+      width: 100%; padding: 11px 14px 11px 40px;
+      background: var(--panel2); border: 1px solid var(--border2);
+      border-radius: 10px; color: var(--text);
+      font-size: 0.9rem; font-family: 'DM Sans', sans-serif;
+      outline: none; transition: all 0.2s;
+    }
+    .gmail-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0,212,255,0.08); }
+    .gmail-input::placeholder { color: var(--muted); }
+    .gmail-input.error { border-color: var(--red); box-shadow: 0 0 0 3px rgba(255,23,68,0.08); }
+
+    .error-msg {
+      font-size: 0.72rem; color: var(--red); margin-top: 6px;
+      display: none; font-family: 'Space Mono', monospace;
+    }
+    .error-msg.show { display: block; }
+
+    /* login button */
+    .login-btn {
+      width: 100%; padding: 13px;
+      background: linear-gradient(135deg, var(--accent2), var(--accent));
+      border: none; border-radius: 10px; color: var(--bg);
+      font-family: 'Space Mono', monospace; font-size: 0.78rem;
+      font-weight: 700; letter-spacing: 0.08em; cursor: pointer;
+      transition: all 0.15s; box-shadow: 0 0 20px rgba(0,212,255,0.25);
+      margin-top: 0.5rem;
+    }
+    .login-btn:hover { transform: translateY(-2px); box-shadow: 0 0 32px rgba(0,212,255,0.4); }
+    .login-btn:active { transform: scale(0.98); }
+
+    /* saved accounts */
+    .saved-section { margin-top: 1.8rem; }
+    .saved-label {
+      font-size: 0.6rem; letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--muted); font-family: 'Space Mono', monospace; font-weight: 700;
+      margin-bottom: 10px; display: flex; align-items: center; gap: 8px;
+    }
+    .saved-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+    .saved-list { display: flex; flex-direction: column; gap: 7px; }
+
+    .saved-account {
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 12px; background: var(--panel2); border: 1px solid var(--border);
+      border-radius: 9px; cursor: pointer; transition: all 0.15s;
+    }
+    .saved-account:hover { border-color: rgba(0,212,255,0.3); background: var(--panel3); }
+    .saved-avatar {
+      width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0;
+      background: linear-gradient(135deg, var(--accent2), var(--accent));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 700; color: var(--bg);
+      font-family: 'Space Mono', monospace;
+    }
+    .saved-email { font-size: 0.8rem; color: var(--text); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .saved-progress { font-size: 0.6rem; color: var(--text2); font-family: 'Space Mono', monospace; }
+    .saved-remove {
+      font-size: 14px; color: var(--muted); background: none; border: none;
+      cursor: pointer; padding: 2px 4px; border-radius: 4px; transition: color 0.15s;
+      flex-shrink: 0;
+    }
+    .saved-remove:hover { color: var(--red); }
+
+    .no-saved {
+      font-size: 0.75rem; color: var(--muted); text-align: center;
+      padding: 12px; font-family: 'Space Mono', monospace;
+    }
+
+    /* privacy note */
+    .privacy-note {
+      margin-top: 1.5rem; font-size: 0.68rem; color: var(--muted);
+      text-align: center; line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-grid"></div>
+  <div class="bg-glow"></div>
+
+  <div class="login-card">
+    <div class="card-top-bar"></div>
+    <span class="logo">CodeJourney</span>
+
+    <h1 class="login-title">Welcome <em>Back</em></h1>
+    <p class="login-sub">Enter your Gmail to load your personal progress. Each account keeps its own achievements and challenge history.</p>
+
+    <div class="input-group">
+      <label class="input-label" for="gmail-input">Your Gmail Address</label>
+      <div class="input-wrap">
+        <span class="input-icon">✉️</span>
+        <input
+          class="gmail-input" id="gmail-input" type="email"
+          placeholder="you@gmail.com" autocomplete="email"
+          onkeydown="if(event.key==='Enter') handleLogin()"
+          oninput="clearError()"
+        />
+      </div>
+      <div class="error-msg" id="error-msg">⚠ Please enter a valid Gmail address (must end in @gmail.com)</div>
+    </div>
+
+    <button class="login-btn" onclick="handleLogin()">→ ENTER CODEJOURNEY</button>
+
+    <div class="saved-section">
+      <div class="saved-label">Saved Accounts</div>
+      <div class="saved-list" id="saved-list"></div>
+    </div>
+
+    <p class="privacy-note">🔒 Progress is stored locally on this device only.<br>No passwords or data are sent anywhere.</p>
+  </div>
+
+  <script>
+    const STORAGE_KEY_USER = 'cj_current_user';
+    const STORAGE_KEY_ACCOUNTS = 'cj_accounts';
+
+    // If already logged in, skip to challenges
+    const currentUser = localStorage.getItem(STORAGE_KEY_USER);
+    if (currentUser) {
+      window.location.href = 'challenges.html';
+    }
+
+    function getSavedAccounts() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY_ACCOUNTS);
+        return raw ? JSON.parse(raw) : [];
+      } catch(e) { return []; }
+    }
+
+    function saveAccount(email) {
+      const accounts = getSavedAccounts();
+      if (!accounts.includes(email)) {
+        accounts.unshift(email);
+        localStorage.setItem(STORAGE_KEY_ACCOUNTS, JSON.stringify(accounts.slice(0, 6)));
+      }
+    }
+
+    function removeAccount(email) {
+      const accounts = getSavedAccounts().filter(a => a !== email);
+      localStorage.setItem(STORAGE_KEY_ACCOUNTS, JSON.stringify(accounts));
+      renderSavedAccounts();
+    }
+
+    function getProgressForUser(email) {
+      try {
+        const key = 'cj_progress_' + email;
+        const raw = localStorage.getItem(key);
+        return raw ? JSON.parse(raw) : { levelStars: {}, bestStreak: 0, perfectLevels: [], totalXP: 0 };
+      } catch(e) { return { levelStars: {}, bestStreak: 0, perfectLevels: [], totalXP: 0 }; }
+    }
+
+    function renderSavedAccounts() {
+      const list = document.getElementById('saved-list');
+      const accounts = getSavedAccounts();
+
+      if (!accounts.length) {
+        list.innerHTML = '<div class="no-saved">No saved accounts yet</div>';
+        return;
+      }
+
+      list.innerHTML = '';
+      accounts.forEach(email => {
+        const prog = getProgressForUser(email);
+        const completed = Object.keys(prog.levelStars).length;
+        const initial = email.charAt(0).toUpperCase();
+
+        const row = document.createElement('div');
+        row.className = 'saved-account';
+        row.onclick = () => loginAs(email);
+        row.innerHTML = `
+          <div class="saved-avatar">${initial}</div>
+          <div style="flex:1;min-width:0;">
+            <div class="saved-email">${email}</div>
+            <div class="saved-progress">${completed} / 8 levels complete · ${prog.totalXP || 0} XP</div>
+          </div>
+          <button class="saved-remove" title="Remove account" onclick="event.stopPropagation(); removeAccount('${email}')">✕</button>
+        `;
+        list.appendChild(row);
+      });
+    }
+
+    function clearError() {
+      document.getElementById('gmail-input').classList.remove('error');
+      document.getElementById('error-msg').classList.remove('show');
+    }
+
+    function handleLogin() {
+      const input = document.getElementById('gmail-input');
+      const email = input.value.trim().toLowerCase();
+
+      if (!email || !email.match(/^[^\s@]+@gmail\.com$/)) {
+        input.classList.add('error');
+        document.getElementById('error-msg').classList.add('show');
+        input.focus();
+        return;
+      }
+
+      loginAs(email);
+    }
+
+    function loginAs(email) {
+      localStorage.setItem(STORAGE_KEY_USER, email);
+      saveAccount(email);
+      window.location.href = 'challenges.html';
+    }
+
+    renderSavedAccounts();
+    document.getElementById('gmail-input').focus();
+  </script>
+</body>
+</html>
